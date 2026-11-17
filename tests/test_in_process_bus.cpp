@@ -8,8 +8,10 @@
 #include <atomic>
 #include <chrono>
 #include <exception>
+#include <iostream>
 #include <memory>
 #include <semaphore>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -141,7 +143,7 @@ TEST_CASE("publish does not wait for handlers", "[in_process]") {
     REQUIRE(finished);
 }
 
-TEST_CASE("handlers run concurrently", "[in_process]") {
+TEST_CASE("handlers run concurrently", "[in_process][threads]") {
     InProcessBus bus;
     std::atomic<int> started{0};
     std::atomic<bool> overlapped{false};
@@ -182,7 +184,7 @@ TEST_CASE("a failing handler is reported and does not affect others", "[in_proce
     std::atomic<int> reported{0};
     std::string message;
     EventBusConfig cfg;
-    cfg.on_error = [&](std::exception_ptr ep) {
+    cfg.on_error = [&](const std::exception_ptr& ep) {
         try {
             std::rethrow_exception(ep);
         } catch (const std::exception& e) {
@@ -210,7 +212,7 @@ TEST_CASE("a failing handler is reported and does not affect others", "[in_proce
 TEST_CASE("a handler that throws before returning its task is reported", "[in_process][errors]") {
     std::atomic<int> reported{0};
     EventBusConfig cfg;
-    cfg.on_error = [&](std::exception_ptr) { ++reported; };
+    cfg.on_error = [&](const std::exception_ptr&) { ++reported; };
     InProcessBus bus(cfg);
     auto sub = bus.subscribe<Ping>([](const Ping&) -> Task<void> { throw std::logic_error("sync"); });
     bus.publish(Ping{});
@@ -218,20 +220,61 @@ TEST_CASE("a handler that throws before returning its task is reported", "[in_pr
     REQUIRE(reported == 1);
 }
 
-TEST_CASE("handler failures are ignored without an error handler, and a throwing error handler is contained",
-          "[in_process][errors]") {
+namespace {
+
+// Redirects std::cerr into a string for the lifetime of the object.
+class CaptureCerr {
+public:
+    CaptureCerr()
+        : old_(std::cerr.rdbuf(buffer_.rdbuf())) {}
+    ~CaptureCerr() { std::cerr.rdbuf(old_); }
+    CaptureCerr(const CaptureCerr&) = delete;
+    CaptureCerr& operator=(const CaptureCerr&) = delete;
+    [[nodiscard]] std::string str() const { return buffer_.str(); }
+
+private:
+    std::ostringstream buffer_;
+    std::streambuf* old_;
+};
+
+} // namespace
+
+TEST_CASE("without an error handler a failing handler is reported on stderr", "[in_process][errors]") {
+    CaptureCerr capture;
     {
         InProcessBus bus;
         auto sub = bus.subscribe<Ping>([](const Ping&) -> Task<void> {
-            throw std::runtime_error("x");
+            throw std::runtime_error("handler exploded");
             co_return;
         });
         bus.publish(Ping{});
         bus.drain().wait();
     }
+    const std::string out = capture.str();
+    REQUIRE(out.find("[tobus]") != std::string::npos);
+    REQUIRE(out.find("handler exploded") != std::string::npos);
+    REQUIRE(out.find("Ping") != std::string::npos); // names the event type
+}
+
+TEST_CASE("a non-std exception from a handler is reported too", "[in_process][errors]") {
+    CaptureCerr capture;
     {
-        EventBusConfig cfg;
-        cfg.on_error = [](std::exception_ptr) { throw std::runtime_error("error handler failed"); };
+        InProcessBus bus;
+        auto sub = bus.subscribe<Ping>([](const Ping&) -> Task<void> {
+            throw 42; // NOLINT(hicpp-exception-baseclass)
+            co_return;
+        });
+        bus.publish(Ping{});
+        bus.drain().wait();
+    }
+    REQUIRE(capture.str().find("unknown exception") != std::string::npos);
+}
+
+TEST_CASE("an explicit no-op error handler silences the report", "[in_process][errors]") {
+    CaptureCerr capture;
+    EventBusConfig cfg;
+    cfg.on_error = [](const std::exception_ptr&) {};
+    {
         InProcessBus bus(cfg);
         auto sub = bus.subscribe<Ping>([](const Ping&) -> Task<void> {
             throw std::runtime_error("x");
@@ -240,6 +283,19 @@ TEST_CASE("handler failures are ignored without an error handler, and a throwing
         bus.publish(Ping{});
         bus.drain().wait();
     }
+    REQUIRE(capture.str().empty());
+}
+
+TEST_CASE("a throwing error handler is contained", "[in_process][errors]") {
+    EventBusConfig cfg;
+    cfg.on_error = [](const std::exception_ptr&) { throw std::runtime_error("error handler failed"); };
+    InProcessBus bus(cfg);
+    auto sub = bus.subscribe<Ping>([](const Ping&) -> Task<void> {
+        throw std::runtime_error("x");
+        co_return;
+    });
+    bus.publish(Ping{});
+    bus.drain().wait();
     SUCCEED();
 }
 
@@ -248,7 +304,7 @@ TEST_CASE("an empty handler is rejected", "[in_process][errors]") {
     REQUIRE_THROWS_AS(bus.subscribe<Ping>(EventHandler<Ping>{}), std::invalid_argument);
 }
 
-TEST_CASE("handlers may publish: drain waits for the whole cascade", "[in_process]") {
+TEST_CASE("handlers may publish: drain waits for the whole cascade", "[in_process][threads]") {
     InProcessBus bus;
     std::atomic<int> pongs{0};
     auto relay = bus.subscribe<Ping>([&](const Ping& p) -> Task<void> {
@@ -279,6 +335,7 @@ TEST_CASE("concurrent publishers deliver every event exactly once", "[in_process
     constexpr int kThreads = 4;
     constexpr int kPerThread = 500;
     std::vector<std::thread> threads;
+    threads.reserve(kThreads);
     for (int t = 0; t < kThreads; ++t) {
         threads.emplace_back([&] {
             for (int i = 0; i < kPerThread; ++i) {
@@ -333,4 +390,32 @@ TEST_CASE("two different types with the same declared name are rejected", "[in_p
     InProcessBus bus;
     auto a = bus.subscribe<CollideA>([](const CollideA&) -> Task<void> { co_return; });
     REQUIRE_THROWS_AS(bus.subscribe<CollideB>([](const CollideB&) -> Task<void> { co_return; }), std::logic_error);
+}
+
+TEST_CASE("publishing a type whose id is taken by another type throws instead of mis-delivering",
+          "[in_process][errors]") {
+    InProcessBus bus;
+    std::atomic<int> received{0};
+    auto a = bus.subscribe<CollideA>([&](const CollideA&) -> Task<void> {
+        ++received;
+        co_return;
+    });
+    REQUIRE_THROWS_AS(bus.publish(CollideB{}), std::logic_error);
+    bus.drain().wait();
+    REQUIRE(received == 0); // CollideA's handler never saw a CollideB
+
+    bus.publish(CollideA{}); // the legitimate type still works
+    bus.drain().wait();
+    REQUIRE(received == 1);
+}
+
+TEST_CASE("the collision message names the offending event", "[in_process][errors]") {
+    InProcessBus bus;
+    auto a = bus.subscribe<CollideA>([](const CollideA&) -> Task<void> { co_return; });
+    try {
+        bus.publish(CollideB{});
+        FAIL("expected std::logic_error");
+    } catch (const std::logic_error& e) {
+        REQUIRE(std::string(e.what()).find("test.Collide") != std::string::npos);
+    }
 }

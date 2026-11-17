@@ -13,7 +13,7 @@ TEST_CASE("TransportKind names round-trip", "[factory]") {
         REQUIRE(*parsed == kind);
     }
     REQUIRE_FALSE(transport_from_string("carrier_pigeon").has_value());
-    REQUIRE(to_string(static_cast<TransportKind>(999)) == "unknown");
+    REQUIRE(to_string(static_cast<TransportKind>(200)) == "unknown");
 }
 
 TEST_CASE("the factory creates an in-process bus by default", "[factory]") {
@@ -27,7 +27,7 @@ TEST_CASE("the factory forwards on_error to the bus", "[factory]") {
     struct Boom {};
     std::atomic<int> reported{0};
     EventBusConfig cfg;
-    cfg.on_error = [&](std::exception_ptr) { ++reported; };
+    cfg.on_error = [&](const std::exception_ptr&) { ++reported; };
     auto bus = EventBusFactory::create(cfg);
     auto sub = bus->subscribe<Boom>([](const Boom&) -> Task<void> {
         throw std::runtime_error("x");
@@ -56,7 +56,7 @@ TEST_CASE("a transport that is not compiled in reports the CMake option", "[fact
 
 TEST_CASE("an out-of-range transport kind is unavailable", "[factory]") {
     EventBusConfig cfg;
-    cfg.transport = static_cast<TransportKind>(999);
+    cfg.transport = static_cast<TransportKind>(200);
     REQUIRE_FALSE(EventBusFactory::is_available(cfg.transport));
     REQUIRE_THROWS_AS(EventBusFactory::create(cfg), TransportNotAvailable);
 }

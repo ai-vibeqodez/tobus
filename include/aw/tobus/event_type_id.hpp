@@ -21,6 +21,16 @@ namespace aw::tobus {
  * @struct EventTypeId
  * @brief 64-bit FNV-1a hash of an event type's declared name. Unlike @c std::type_index it is identical
  *        in every process, so it can travel on the wire.
+ *
+ * What is guaranteed:
+ *  - Within one process two different C++ types never share an id silently: the bus compares @c std::type_info on
+ *    @c subscribe() and @c publish() and throws @c std::logic_error on a clash. A wrong-type delivery cannot happen.
+ *  - The hash is not collision-free: with 64 bits the chance that two of N names collide is about N^2 / 2^65
+ *    (about 3e-14 for 1000 event types). Colliding names are fixed by renaming one of them.
+ *
+ * What is not: across processes only the id travels, so a collision between types of two different programs
+ * cannot be detected locally. Decoding a payload as the wrong type is then the codec's problem; transports that
+ * need more safety can add the name (or a schema hash) to the frame header without changing this type.
  */
 struct EventTypeId {
     std::uint64_t value = 0;

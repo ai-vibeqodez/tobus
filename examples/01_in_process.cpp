@@ -40,7 +40,7 @@ private:
 int main() {
     EventBusConfig config;
     config.transport = TransportKind::in_process; // change this (and nothing else) to switch transport
-    config.on_error = [](std::exception_ptr ep) {
+    config.on_error = [](const std::exception_ptr& ep) {
         try {
             std::rethrow_exception(ep);
         } catch (const std::exception& ex) {

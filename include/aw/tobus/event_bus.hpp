@@ -30,7 +30,12 @@ namespace aw::tobus {
  * Semantics:
  *  - @c publish is fire-and-forget: it never waits for handlers; handlers run concurrently on the @c aw::tpl pool.
  *  - No ordering guarantee between handlers, or between two events delivered to one handler.
- *  - A handler's exceptions go to @c EventBusConfig::on_error, never to the publisher.
+ *  - A handler's exceptions go to @c EventBusConfig::on_error (stderr if none is set), never to the publisher.
+ *
+ * Lifecycle: there is no @c shutdown(). @c drain() is the quiescence point, and destroying the bus never blocks
+ * and never invalidates running handlers. Transports that own connections close them in their destructor;
+ * if they need an asynchronous close, it will be added as a non-pure virtual with a @c drain()-based default,
+ * which does not break existing transports or callers.
  */
 class IEventBus {
 public:
@@ -43,6 +48,8 @@ public:
      *
      * The event is moved/copied once into shared storage; subscribers receive a reference to that one object.
      * @tparam E Deduced; the event type is @c std::remove_cvref_t<E>.
+     * @throws std::logic_error If a different event type with the same @c EventTypeId has subscribers on this bus
+     *         (two types declare the same @c EventTraits name). Delivering would reinterpret one type as the other.
      */
     template <typename E>
         requires std::constructible_from<std::remove_cvref_t<E>, E&&>

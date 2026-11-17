@@ -7,3 +7,8 @@ aw_test_target(NAME tobus
         test_factory.cpp
         test_stubs.cpp
     LINK_TARGET aw::tobus)
+
+# The cases tagged [threads] (concurrent publishers, subscribe/unsubscribe races, ...) as one named CTest entry, so CI
+# can hammer just them: ctest -R tobus_concurrency --repeat until-fail:30
+add_test(NAME tobus_concurrency COMMAND tobus_tests "[threads]")
+set_tests_properties(tobus_concurrency PROPERTIES LABELS "concurrency" TIMEOUT 120)

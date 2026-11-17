@@ -18,6 +18,9 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <string>
+#include <string_view>
+#include <typeinfo>
 #include <unordered_map>
 #include <vector>
 
@@ -47,14 +50,21 @@ public:
      */
     [[nodiscard]] Subscription subscribe(const EventTypeInfo& type, RawEventHandler handler);
 
-    /// Starts one concurrent delivery per handler of @p type and returns without waiting.
-    void dispatch(const EventTypeInfo& type, std::shared_ptr<const void> event);
+    /**
+     * @brief Starts one concurrent delivery per handler of @p type and returns without waiting.
+     * @throws std::logic_error If another event type with the same @c EventTypeId has subscribers here.
+     */
+    void dispatch(const EventTypeInfo& type, const std::shared_ptr<const void>& event);
 
     /// Completes when no delivery is in flight (see @c IEventBus::drain). Keeps @p self alive meanwhile.
     [[nodiscard]] static Task<void> drain(std::shared_ptr<Dispatcher> self);
 
-    /// Forwards @p ep to the configured error handler; never throws.
-    void report(std::exception_ptr ep) noexcept;
+    /**
+     * @brief Forwards @p ep to the configured error handler; never throws.
+     *
+     * Without a configured handler the failure is written to stderr (naming @p event_name) instead of being lost.
+     */
+    void report(const std::exception_ptr& ep, std::string_view event_name) noexcept;
 
     /// Number of registered handlers for @p id.
     [[nodiscard]] std::size_t subscriber_count(EventTypeId id) const;
@@ -67,8 +77,9 @@ private:
     using Table = std::unordered_map<EventTypeId, std::vector<Entry>>;
 
     void unsubscribe(EventTypeId id, std::uint64_t token) noexcept;
+    [[nodiscard]] static std::string collision_message(std::string_view event_name);
     [[nodiscard]] static Task<void> run(std::shared_ptr<Dispatcher> self, std::shared_ptr<RawEventHandler> handler,
-                                        std::shared_ptr<const void> event);
+                                        std::shared_ptr<const void> event, std::string_view event_name);
 
     ErrorHandler on_error_;
     mutable std::mutex mtx_;

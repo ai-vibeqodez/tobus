@@ -31,10 +31,11 @@
 namespace aw::tobus {
 
 bool EventBusFactory::is_available(TransportKind kind) noexcept {
+    // The branches look alike but each reads a different compile-time TOBUS_HAS_* switch.
     switch (kind) {
     case TransportKind::in_process:
         return true;
-    case TransportKind::unix_socket:
+    case TransportKind::unix_socket: // NOLINT(bugprone-branch-clone)
         return TOBUS_HAS_UNIX_SOCKET != 0;
     case TransportKind::tcp_server:
         return TOBUS_HAS_TCP_SERVER != 0;

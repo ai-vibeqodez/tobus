@@ -1,12 +1,36 @@
-#include <aw/tobus/detail/dispatcher.hpp>
+#include "detail/dispatcher.hpp"
 
 #include <aw/tpl/threading/tasks/spawn.hpp>
 
+#include <exception>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
 namespace aw::tobus::detail {
+
+namespace {
+
+// What happens to a failure when the application gave no EventBusConfig::on_error: one line on stderr, so that a
+// broken handler never disappears without a trace. Applications that really want silence install a no-op handler.
+void write_default_report(std::string_view event_name, const std::exception_ptr& ep) noexcept {
+    try {
+        std::string line = "[tobus] handler for event '" + std::string(event_name) + "' failed: ";
+        try {
+            std::rethrow_exception(ep);
+        } catch (const std::exception& e) {
+            line += e.what();
+        } catch (...) {
+            line += "unknown exception";
+        }
+        line += '\n';
+        std::cerr << line << std::flush; // one insertion: lines from concurrent handlers do not interleave mid-line
+    } catch (...) { // NOLINT(bugprone-empty-catch): reporting must never throw (bad_alloc, closed stderr)
+    }
+}
+
+} // namespace
 
 Dispatcher::Dispatcher(PrivateTag, ErrorHandler on_error)
     : on_error_(std::move(on_error)) {}
@@ -23,8 +47,7 @@ Subscription Dispatcher::subscribe(const EventTypeInfo& type, RawEventHandler ha
         const auto [it, inserted] = identities_.try_emplace(type.id, type.type);
         // The id is a hash of the name: two different C++ types sharing it would receive each other's events.
         if (!inserted && *it->second != *type.type) {
-            throw std::logic_error("tobus: event type id collision for '" + std::string(type.name) +
-                                   "': give each event type a unique EventTraits<T>::name");
+            throw std::logic_error(collision_message(type.name));
         }
         token = next_token_++;
         auto next = std::make_shared<Table>(*table_);
@@ -65,10 +88,16 @@ std::size_t Dispatcher::subscriber_count(EventTypeId id) const {
     return it == snapshot->end() ? 0 : it->second.size();
 }
 
-void Dispatcher::dispatch(const EventTypeInfo& type, std::shared_ptr<const void> event) {
+void Dispatcher::dispatch(const EventTypeInfo& type, const std::shared_ptr<const void>& event) {
     std::shared_ptr<const Table> snapshot;
     {
         std::lock_guard lock(mtx_);
+        // Handlers reinterpret the payload as their own type. If another type shares this id, delivering would
+        // be undefined behaviour, so refuse instead (subscribe() catches the case where both types subscribe).
+        const auto known = identities_.find(type.id);
+        if (known != identities_.end() && *known->second != *type.type) {
+            throw std::logic_error(collision_message(type.name));
+        }
         snapshot = table_;
     }
     const auto it = snapshot->find(type.id);
@@ -80,10 +109,10 @@ void Dispatcher::dispatch(const EventTypeInfo& type, std::shared_ptr<const void>
         // Count before starting: run() may finish (and call done()) on another thread immediately.
         inflight_.add();
         try {
-            aw::tpl::threading::tasks::co_spawn(run(self, entry.handler, event));
+            aw::tpl::threading::tasks::co_spawn(run(self, entry.handler, event, type.name));
         } catch (...) {
             inflight_.done();
-            report(std::current_exception());
+            report(std::current_exception(), type.name);
         }
     }
 }
@@ -91,11 +120,11 @@ void Dispatcher::dispatch(const EventTypeInfo& type, std::shared_ptr<const void>
 // The frame owns `self`, the handler and the event until the end: the handler's `const T&` can never dangle,
 // and the group (a member of *self) outlives the final done().
 Task<void> Dispatcher::run(std::shared_ptr<Dispatcher> self, std::shared_ptr<RawEventHandler> handler,
-                           std::shared_ptr<const void> event) {
+                           std::shared_ptr<const void> event, std::string_view event_name) {
     try {
         co_await (*handler)(event.get());
     } catch (...) {
-        self->report(std::current_exception());
+        self->report(std::current_exception(), event_name);
     }
     handler.reset();
     event.reset();
@@ -106,8 +135,14 @@ Task<void> Dispatcher::drain(std::shared_ptr<Dispatcher> self) {
     co_await self->inflight_.wait_async();
 }
 
-void Dispatcher::report(std::exception_ptr ep) noexcept {
+std::string Dispatcher::collision_message(std::string_view event_name) {
+    return "tobus: event type id collision for '" + std::string(event_name) +
+           "': another C++ type already uses this EventTraits<T>::name; give each event type a unique name";
+}
+
+void Dispatcher::report(const std::exception_ptr& ep, std::string_view event_name) noexcept {
     if (!on_error_) {
+        write_default_report(event_name, ep);
         return;
     }
     try {

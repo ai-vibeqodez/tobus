@@ -1,0 +1,8 @@
+# Inherits the project config. Handlers here are lambdas returning Task<void> that take `const Event&`:
+# tobus keeps the event (and the dispatcher) alive inside the coroutine frame until the handler finishes, and a
+# handler is owned by the bus (std::function) for as long as it can be called, so both coroutine checks are
+# false positives for this API. Library code under src/ and include/ keeps them enabled.
+InheritParentConfig: true
+Checks: >-
+  -cppcoreguidelines-avoid-reference-coroutine-parameters,
+  -cppcoreguidelines-avoid-capturing-lambda-coroutines

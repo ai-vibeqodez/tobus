@@ -7,6 +7,7 @@
 
 #include <array>
 #include <optional>
+#include <cstdint>
 #include <string_view>
 
 namespace aw::tobus {
@@ -15,7 +16,7 @@ namespace aw::tobus {
  * @enum TransportKind
  * @brief Selects the transport behind an @c IEventBus. Module code never names a transport; only configuration does.
  */
-enum class TransportKind {
+enum class TransportKind : std::uint8_t {
     in_process,
     unix_socket,
     tcp_server,

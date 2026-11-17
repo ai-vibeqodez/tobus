@@ -1,6 +1,6 @@
 #include <aw/tobus/transports/in_process_bus.hpp>
 
-#include <aw/tobus/detail/dispatcher.hpp>
+#include "detail/dispatcher.hpp"
 
 #include <utility>
 
@@ -20,7 +20,7 @@ std::string_view InProcessBus::transport_name() const noexcept {
 }
 
 void InProcessBus::publish_raw(const EventTypeInfo& type, std::shared_ptr<const void> event) {
-    dispatcher_->dispatch(type, std::move(event));
+    dispatcher_->dispatch(type, event);
 }
 
 Subscription InProcessBus::subscribe_raw(const EventTypeInfo& type, RawEventHandler handler) {

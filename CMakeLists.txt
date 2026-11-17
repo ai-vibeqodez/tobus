@@ -6,6 +6,9 @@ include(cmake/ProjectConfig)
 aw_project_config(NAME tobus NS aw::tobus)
 project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
 
+# clang-tidy (CI) reads compile_commands.json. aw_project_config() sets this too, but only in its own function scope.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Top-level builds get tests and examples by default; consumers (FetchContent / add_subdirectory) do not.
 if(PROJECT_IS_TOP_LEVEL)
     set(TOBUS_IS_TOP_LEVEL ON)
@@ -64,11 +67,14 @@ add_library(tobus STATIC
     src/transport_kind.cpp
     src/event_bus_factory.cpp
     src/detail/dispatcher.cpp
+    src/detail/dispatcher.hpp
     src/transports/in_process_bus.cpp
     src/transports/framed_bus.cpp
 )
 add_library(aw::tobus ALIAS tobus)
 target_compile_features(tobus PUBLIC cxx_std_20)
+# src/ is the library's private include root (detail/dispatcher.hpp); it is not part of the installed or exported interface.
+target_include_directories(tobus PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_options(tobus PRIVATE ${AW_WARNINGS} ${AW_STRICT_WARNINGS})
 target_link_libraries(tobus PUBLIC aw::tpl)
 
@@ -110,7 +116,6 @@ target_sources(tobus
             include/aw/tobus/subscription.hpp
             include/aw/tobus/tobus.hpp
             include/aw/tobus/transport_kind.hpp
-            include/aw/tobus/detail/dispatcher.hpp
             include/aw/tobus/transports/framed_bus.hpp
             include/aw/tobus/transports/in_process_bus.hpp
             include/aw/tobus/transports/unix_socket_bus.hpp

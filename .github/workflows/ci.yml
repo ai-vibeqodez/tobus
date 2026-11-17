@@ -1,0 +1,106 @@
+# CI: build + test on every pull request. The heavier checks (sanitizers, lint, coverage) live in test.yml and the
+# downstream-consumer checks in consumers.yml.
+#
+# Runners are pinned to ubuntu-24.04 on purpose: `ubuntu-latest` moves to 26.04 and would silently change compilers.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  merge_group:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: ${{ matrix.toolchain }} / ${{ matrix.build_type }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [clang18-libcxx, gcc15]
+        build_type: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        id: tc
+        uses: ./.github/actions/setup-toolchain
+        with:
+          toolchain: ${{ matrix.toolchain }}
+
+      # Every transport stub is switched on so that all of them are compiled (and -Werror'd) in CI.
+      - name: Configure & Build
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: ${{ matrix.build_type }}
+          extra_args: >-
+            ${{ steps.tc.outputs.cmake_args }}
+            -DTOBUS_WARNINGS_AS_ERRORS=ON
+            -DTOBUS_ENABLE_UNIX_SOCKET=ON
+            -DTOBUS_ENABLE_TCP_SERVER=ON
+            -DTOBUS_ENABLE_HTTP=ON
+            -DTOBUS_ENABLE_WEBSOCKET=ON
+            -DTOBUS_ENABLE_REDIS=ON
+            -DTOBUS_ENABLE_ZEROMQ=ON
+            -DTOBUS_ENABLE_RABBITMQ=ON
+            -DTOBUS_ENABLE_KAFKA=ON
+
+      - name: Run Tests
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: ${{ matrix.build_type }}
+          output_on_failure: true
+          timeout: 120
+
+      - name: Run example
+        run: ./build/examples/tobus_example_01_in_process
+
+  # Default options (no transport stubs): this is what a consumer gets without enabling anything.
+  build-test-default:
+    name: default options / ${{ matrix.toolchain }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [clang18-libcxx, gcc15]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        id: tc
+        uses: ./.github/actions/setup-toolchain
+        with:
+          toolchain: ${{ matrix.toolchain }}
+
+      - name: Configure & Build
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: Release
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_WARNINGS_AS_ERRORS=ON
+
+      - name: Run Tests
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: Release
+          output_on_failure: true
+          timeout: 120

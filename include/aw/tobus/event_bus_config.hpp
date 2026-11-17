@@ -27,7 +27,15 @@ struct EventBusConfig {
     /// Transport-specific settings (documented by each transport).
     std::map<std::string, std::string> options;
 
-    /// Receives failures nobody else can observe (a throwing handler, a failed send). Empty = ignore.
+    /**
+     * Receives failures nobody else can observe (a throwing handler, a failed send).
+     *
+     * Empty (the default) means: write one line per failure to @c std::cerr, naming the event type. Errors are never
+     * dropped silently by accident; to silence them on purpose, install a handler that does nothing
+     * (@c cfg.on_error = [](std::exception_ptr) {};).
+     *
+     * Called from pool threads, possibly concurrently: it must be thread-safe, and anything it throws is discarded.
+     */
     ErrorHandler on_error;
 };
 
