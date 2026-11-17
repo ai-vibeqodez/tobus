@@ -48,9 +48,7 @@ int main() {
 
 ## 🧩 Пример
 
-Полный разбор — [`examples/README.md`](examples/README.md), код — [`examples/01_in_process.cpp`](examples/01_in_process.cpp).
-
-Чат из независимых модулей: `Auth` публикует `UserJoined`, `Room` принимает сообщения и показывает только одобренные, `Moderation` проверяет на спам (каскад: `MessageSent` → `MessageApproved` / `MessageBlocked`), `Notifier` предупреждает автора о блокировке, `Stats` считает всё. Модули не знают друг о друге — только через шину.
+Полный разбор — [`examples/README.md`](examples/README.md).
 
 ## ⚙️ Семантика
 
