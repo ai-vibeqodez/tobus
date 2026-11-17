@@ -8,3 +8,7 @@ foreach(example IN LISTS TOBUS_EXAMPLES)
     target_link_libraries(tobus_example_${example} PRIVATE aw::tobus)
     target_compile_options(tobus_example_${example} PRIVATE ${AW_WARNINGS} ${AW_STRICT_WARNINGS})
 endforeach()
+
+# ---- modular examples (directory-per-example) --------------------------------
+
+add_subdirectory(chat)
