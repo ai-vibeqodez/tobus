@@ -1,0 +1,33 @@
+# ── aw::tobus ────────────────────────────────────────────────────────────
+# Everyday build targets.
+#
+#   make build | test | clean   (BUILD_TYPE=Debug|Release, default Debug)
+#
+# Examples:
+#   make build BUILD_TYPE=Release
+#   make test BUILD_TYPE=Release
+
+BUILD_TYPE ?= Debug
+
+.PHONY: build test clean lint format
+
+build:
+	cmake -B build -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+	cmake --build build --parallel
+
+test: build
+	@if [ -f tests/CMakeLists.txt ]; then ctest --test-dir build --output-on-failure; \
+	else echo "No tests/ directory."; fi
+
+lint: build
+	@if command -v clang-tidy >/dev/null 2>&1; then \
+	    find include src -name '*.hpp' -o -name '*.cpp' | xargs clang-tidy -p build; \
+	else echo "clang-tidy not found"; fi
+
+format:
+	@if command -v clang-format >/dev/null 2>&1; then \
+	    find include src examples tests -name '*.hpp' -o -name '*.cpp' 2>/dev/null | xargs clang-format -i; \
+	else echo "clang-format not found (>= 15 required)"; fi
+
+clean:
+	rm -rf build
