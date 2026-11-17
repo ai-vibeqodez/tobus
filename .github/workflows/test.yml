@@ -85,6 +85,11 @@ jobs:
   sanitizers:
     name: ${{ matrix.name }}
     runs-on: ubuntu-24.04
+    # The distro libc++/libc++abi are not ASan-instrumented: they allocate exception messages with the (intercepted)
+    # operator new but release them with plain free(), which ASan reports as alloc-dealloc-mismatch on every
+    # thrown std::runtime_error/logic_error. A toolchain false positive, not a tobus bug.
+    env:
+      ASAN_OPTIONS: alloc_dealloc_mismatch=0:detect_leaks=1
     strategy:
       fail-fast: false
       matrix:
@@ -136,7 +141,7 @@ jobs:
         working-directory: build
         env:
           TSAN_OPTIONS: halt_on_error=1 second_deadlock_stack=1
-          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          ASAN_OPTIONS: alloc_dealloc_mismatch=0:detect_leaks=1:halt_on_error=1
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: ctest -C RelWithDebInfo -R tobus_concurrency --repeat until-fail:30 --output-on-failure --timeout 300
 
