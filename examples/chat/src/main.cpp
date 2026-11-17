@@ -10,6 +10,7 @@
 #include <iostream>
 #include <mutex>
 #include <string>
+#include <thread>
 
 #include "auth.hpp"
 #include "moderation.hpp"
@@ -27,7 +28,7 @@ using namespace std::chrono_literals;
 static void log(std::string_view line) {
     static std::mutex m;
     std::lock_guard lock(m);
-    std::cout << line << "\n";
+    std::cout << "[thread " << std::this_thread::get_id() << "] " << line << "\n";
 }
 
 // ---- main -------------------------------------------------------------------
