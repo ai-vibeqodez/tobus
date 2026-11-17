@@ -1,0 +1,39 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "dev-local",
+      "displayName": "Debug, local /workspace/tpl checkout",
+      "inherits": "dev",
+      "binaryDir": "${sourceDir}/build/dev-local",
+      "cacheVariables": { "FETCHCONTENT_SOURCE_DIR_AW_TPL": "/workspace/tpl" }
+    },
+    {
+      "name": "all-transports",
+      "displayName": "Debug, clang-18 + libc++, every transport stub, -Werror, local tpl",
+      "inherits": "clang18-libcxx",
+      "binaryDir": "${sourceDir}/build/all-transports",
+      "cacheVariables": {
+        "FETCHCONTENT_SOURCE_DIR_AW_TPL": "/workspace/tpl",
+        "TOBUS_WARNINGS_AS_ERRORS": "ON",
+        "TOBUS_ENABLE_UNIX_SOCKET": "ON",
+        "TOBUS_ENABLE_TCP_SERVER": "ON",
+        "TOBUS_ENABLE_HTTP": "ON",
+        "TOBUS_ENABLE_WEBSOCKET": "ON",
+        "TOBUS_ENABLE_REDIS": "ON",
+        "TOBUS_ENABLE_ZEROMQ": "ON",
+        "TOBUS_ENABLE_RABBITMQ": "ON",
+        "TOBUS_ENABLE_KAFKA": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "dev-local", "configurePreset": "dev-local" },
+    { "name": "all-transports", "configurePreset": "all-transports" }
+  ],
+  "testPresets": [
+    { "name": "dev-local", "configurePreset": "dev-local", "output": { "outputOnFailure": true } },
+    { "name": "all-transports", "configurePreset": "all-transports", "output": { "outputOnFailure": true } }
+  ]
+}
