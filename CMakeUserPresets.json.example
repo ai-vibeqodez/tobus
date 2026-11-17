@@ -4,10 +4,12 @@
   "configurePresets": [
     {
       "name": "dev-local",
-      "displayName": "Debug, local /workspace/tpl checkout",
-      "inherits": "dev",
+      "displayName": "Debug, local tpl checkout",
+      "inherits": "debug",
       "binaryDir": "${sourceDir}/build/dev-local",
-      "cacheVariables": { "FETCHCONTENT_SOURCE_DIR_AW_TPL": "/workspace/tpl" }
+      "cacheVariables": {
+        "FETCHCONTENT_SOURCE_DIR_AW_TPL": "<path-to-your-tpl-checkout>"
+      }
     },
     {
       "name": "all-transports",
@@ -15,7 +17,7 @@
       "inherits": "clang18-libcxx",
       "binaryDir": "${sourceDir}/build/all-transports",
       "cacheVariables": {
-        "FETCHCONTENT_SOURCE_DIR_AW_TPL": "/workspace/tpl",
+        "FETCHCONTENT_SOURCE_DIR_AW_TPL": "<path-to-your-tpl-checkout>",
         "TOBUS_WARNINGS_AS_ERRORS": "ON",
         "TOBUS_ENABLE_UNIX_SOCKET": "ON",
         "TOBUS_ENABLE_TCP_SERVER": "ON",

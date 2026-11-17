@@ -8,20 +8,21 @@
 #   make test BUILD_TYPE=Release
 
 BUILD_TYPE ?= Debug
+PRESET     := $(if $(filter Release,$(BUILD_TYPE)),release,debug)
 
 .PHONY: build test clean lint format
 
 build:
-	cmake -B build -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
-	cmake --build build --parallel
+	cmake --preset $(PRESET)
+	cmake --build --preset $(PRESET)
 
 test: build
-	@if [ -f tests/CMakeLists.txt ]; then ctest --test-dir build --output-on-failure; \
+	@if [ -f tests/CMakeLists.txt ]; then ctest --preset $(PRESET); \
 	else echo "No tests/ directory."; fi
 
 lint: build
 	@if command -v clang-tidy >/dev/null 2>&1; then \
-	    find include src -name '*.hpp' -o -name '*.cpp' | xargs clang-tidy -p build; \
+	    find include src -name '*.hpp' -o -name '*.cpp' | xargs clang-tidy -p build/$(PRESET); \
 	else echo "clang-tidy not found"; fi
 
 format:

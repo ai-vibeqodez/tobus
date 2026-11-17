@@ -7,14 +7,20 @@
   },
   "configurePresets": [
     {
-      "name": "dev",
+      "name": "debug",
       "displayName": "Debug",
-      "binaryDir": "${sourceDir}/build/dev"
+      "binaryDir": "${sourceDir}/build/Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
     },
     {
       "name": "release",
       "displayName": "Release",
-      "binaryDir": "${sourceDir}/build/release"
+      "binaryDir": "${sourceDir}/build/Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
     },
     {
       "name": "clang18-libcxx",
@@ -31,8 +37,8 @@
   ],
   "buildPresets": [
     {
-      "name": "dev",
-      "configurePreset": "dev",
+      "name": "debug",
+      "configurePreset": "debug",
       "configuration": "Debug"
     },
     {
@@ -47,8 +53,8 @@
   ],
   "testPresets": [
     {
-      "name": "dev",
-      "configurePreset": "dev",
+      "name": "debug",
+      "configurePreset": "debug",
       "configuration": "Debug",
       "output": {
         "outputOnFailure": true

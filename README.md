@@ -5,9 +5,12 @@
 Независимая от транспорта шина событий (event bus) для **C++20** (`aw::tobus`). Модули зависят только от интерфейса `IEventBus`; выбор транспорта под капотом (внутрипроцессная «маршрутка» сегодня; сокеты и брокеры — завтра) определяется исключительно конфигурацией.
 
 Используйте код с осторожностью.
+
+```text
 Module --publish--> IEventBus --subscribe--> Module
                       ^
               "какой маршрут?"  in_process / unix_socket / redis / kafka / ...
+```
 
 Зависит только от корутин [`aw::tpl`](https://github.com/ai-warevo/tpl) и стандартной библиотеки C++.
 
@@ -107,9 +110,9 @@ target_link_libraries(app PRIVATE aw::tobus)
 ## 💻 Разработка и сборка
 
 ```sh
-cp CMakeUserPresets.json.example CMakeUserPresets.json     # локальные пресеты (в .gitignore); использует /workspace/tpl
-cmake --preset dev-local && cmake --build --preset dev-local && ctest --preset dev-local
-cmake --preset all-transports && cmake --build --preset all-transports && ctest --preset all-transports   # clang-18 + libc++
+cp CMakeUserPresets.json.example CMakeUserPresets.json     # локальные пресеты (в .gitignore)
+cmake --preset dev && cmake --build --preset dev && ctest --preset dev
+cmake --preset clang18-libcxx && cmake --build --preset clang18-libcxx && ctest --preset clang18-libcxx
 ```
 
 **Тулчейн:** C++20, CMake 3.23+, `clang-18` + `libc++` (флаг `-fexperimental-library` добавляется автоматически из `aw::tpl`) либо `GCC 15` / `clang 19` с `libstdc++`.
