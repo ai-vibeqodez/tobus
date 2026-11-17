@@ -34,7 +34,7 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ./.github/actions/setup-toolchain
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
 
@@ -84,7 +84,7 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ./.github/actions/setup-toolchain
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
 

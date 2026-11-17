@@ -32,7 +32,7 @@ jobs:
 
       - name: Install toolchain + tools
         id: tc
-        uses: ./.github/actions/setup-toolchain
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: clang18-libcxx
           tools: 'true'
@@ -109,7 +109,7 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ./.github/actions/setup-toolchain
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
           sanitizer_runtime: 'true'
@@ -159,7 +159,7 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ./.github/actions/setup-toolchain
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
 

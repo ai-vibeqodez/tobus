@@ -7,7 +7,7 @@
 #
 # Usage:
 #   - id: tc
-#     uses: ./.github/actions/setup-toolchain
+#     uses: ai-warevo/.github/ci/actions/setup-toolchain@main
 #     with: { toolchain: clang18-libcxx }
 #   - uses: ai-warevo/.github/ci/actions/cmake-build@main
 #     with: { extra_args: "${{ steps.tc.outputs.cmake_args }} -DTOBUS_WARNINGS_AS_ERRORS=ON" }
