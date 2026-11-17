@@ -12,8 +12,6 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
-  schedule:
-    - cron: '0 6 * * 1' # Mondays 06:00 UTC: concurrency bugs are probabilistic, so keep sampling
 
 permissions:
   contents: write # badge + gh-pages deploy (main only)
