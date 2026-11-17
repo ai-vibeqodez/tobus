@@ -6,6 +6,9 @@
 #
 # fetch_content clones from the network, so it only means something once the commit is pushed; it is pinned to the
 # exact commit being tested (PR head / pushed sha) rather than `main`, so a PR tests itself.
+#
+# Linux jobs run inside ghcr.io/ai-warevo/ci-cpp20 (linux/amd64).
+# MSVC runs on windows-latest (native runner).
 
 name: Consumers
 
@@ -25,20 +28,23 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  IMAGE: ghcr.io/ai-warevo/ci-cpp20
+
 jobs:
-  add-subdirectory:
+  # ────────────────────────────────────────────────────────────
+  # ADD_SUBDIRECTORY — Linux (container)
+  # ────────────────────────────────────────────────────────────
+  add-subdirectory-linux:
     name: add_subdirectory (${{ matrix.toolchain }})
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - toolchain: clang18-libcxx
-            os: ubuntu-24.04
-          - toolchain: gcc15
-            os: ubuntu-24.04
-          - toolchain: msvc
-            os: windows-latest
+        toolchain: [clang18-libcxx, gcc15]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,11 +54,7 @@ jobs:
         uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
-
-      - name: Normalize workspace path
-        id: ws
-        run: echo "path=$(echo '${{ github.workspace }}' | tr '\\' '/')" >> "$GITHUB_OUTPUT"
-        shell: bash
+          container_mode: true
 
       - name: Configure & Build consumer
         uses: ai-warevo/.github/ci/actions/cmake-build@main
@@ -60,7 +62,7 @@ jobs:
           source_dir: ci/consumers/add_subdirectory
           build_dir: build
           build_type: Release
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ steps.ws.outputs.path }}
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ github.workspace }}
 
       - name: Run consumer
         uses: ai-warevo/.github/ci/actions/ctest-run@main
@@ -69,19 +71,50 @@ jobs:
           build_dir: build
           output_on_failure: true
 
-  find-package:
+  add-subdirectory-windows:
+    name: add_subdirectory (MSVC)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: msvc
+
+      - name: Configure & Build consumer
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: ci/consumers/add_subdirectory
+          build_dir: build
+          build_type: Release
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ github.workspace }}
+
+      - name: Run consumer
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: ci/consumers/add_subdirectory
+          build_dir: build
+          output_on_failure: true
+
+  # ────────────────────────────────────────────────────────────
+  # FIND_PACKAGE — Linux (container)
+  # ────────────────────────────────────────────────────────────
+  find-package-linux:
     name: find_package (${{ matrix.toolchain }})
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - toolchain: clang18-libcxx
-            os: ubuntu-24.04
-          - toolchain: gcc15
-            os: ubuntu-24.04
-          - toolchain: msvc
-            os: windows-latest
+        toolchain: [clang18-libcxx, gcc15]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,11 +124,7 @@ jobs:
         uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
-
-      - name: Normalize workspace path
-        id: ws
-        run: echo "path=$(echo '${{ github.workspace }}' | tr '\\' '/')" >> "$GITHUB_OUTPUT"
-        shell: bash
+          container_mode: true
 
       - name: Build & install tobus (+ aw_tpl)
         uses: ai-warevo/.github/ci/actions/cmake-build@main
@@ -104,7 +133,11 @@ jobs:
           build_dir: build
           build_type: Release
           install: true
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_BUILD_TESTS=OFF -DTOBUS_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=${{ steps.ws.outputs.path }}/prefix
+          extra_args: >-
+            ${{ steps.tc.outputs.cmake_args }}
+            -DTOBUS_BUILD_TESTS=OFF
+            -DTOBUS_BUILD_EXAMPLES=OFF
+            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/prefix
 
       - name: Configure & Build consumer
         uses: ai-warevo/.github/ci/actions/cmake-build@main
@@ -112,7 +145,7 @@ jobs:
           source_dir: ci/consumers/find_package
           build_dir: build
           build_type: Release
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DCMAKE_PREFIX_PATH=${{ steps.ws.outputs.path }}/prefix
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/prefix
 
       - name: Run consumer
         uses: ai-warevo/.github/ci/actions/ctest-run@main
@@ -121,19 +154,63 @@ jobs:
           build_dir: build
           output_on_failure: true
 
-  fetch-content:
+  find-package-windows:
+    name: find_package (MSVC)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: msvc
+
+      - name: Build & install tobus (+ aw_tpl)
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: Release
+          install: true
+          extra_args: >-
+            ${{ steps.tc.outputs.cmake_args }}
+            -DTOBUS_BUILD_TESTS=OFF
+            -DTOBUS_BUILD_EXAMPLES=OFF
+            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/prefix
+
+      - name: Configure & Build consumer
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: ci/consumers/find_package
+          build_dir: build
+          build_type: Release
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/prefix
+
+      - name: Run consumer
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: ci/consumers/find_package
+          build_dir: build
+          output_on_failure: true
+
+  # ────────────────────────────────────────────────────────────
+  # FETCH_CONTENT — Linux (container)
+  # ────────────────────────────────────────────────────────────
+  fetch-content-linux:
     name: FetchContent (${{ matrix.toolchain }})
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - toolchain: clang18-libcxx
-            os: ubuntu-24.04
-          - toolchain: gcc15
-            os: ubuntu-24.04
-          - toolchain: msvc
-            os: windows-latest
+        toolchain: [clang18-libcxx, gcc15]
     env:
       # PR: the head commit of the PR's own repository (works for forks too); otherwise the pushed commit.
       TOBUS_URL: ${{ github.event.pull_request.head.repo.clone_url || format('{0}/{1}.git', github.server_url, github.repository) }}
@@ -147,6 +224,41 @@ jobs:
         uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
+          container_mode: true
+
+      - name: Configure & Build consumer (fetches tobus ${{ env.TOBUS_TAG }})
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: ci/consumers/fetch_content
+          build_dir: build
+          build_type: Release
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_GIT_URL=${{ env.TOBUS_URL }} -DTOBUS_GIT_TAG=${{ env.TOBUS_TAG }}
+
+      - name: Run consumer
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: ci/consumers/fetch_content
+          build_dir: build
+          output_on_failure: true
+
+  fetch-content-windows:
+    name: FetchContent (MSVC)
+    runs-on: windows-latest
+    env:
+      TOBUS_URL: ${{ github.event.pull_request.head.repo.clone_url || format('{0}/{1}.git', github.server_url, github.repository) }}
+      TOBUS_TAG: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout (only for the composite actions and the consumer project)
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: msvc
 
       - name: Configure & Build consumer (fetches tobus ${{ env.TOBUS_TAG }})
         uses: ai-warevo/.github/ci/actions/cmake-build@main

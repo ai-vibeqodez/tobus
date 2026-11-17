@@ -1,7 +1,9 @@
 # CI: build + test on every pull request. The heavier checks (sanitizers, lint, coverage) live in test.yml and the
 # downstream-consumer checks in consumers.yml.
 #
-# Runners are pinned to ubuntu-24.04 on purpose: `ubuntu-latest` moves to 26.04 and would silently change compilers.
+# Linux jobs run inside ghcr.io/ai-warevo/ci-cpp20 (linux/amd64):
+#   gcc-15, clang-18 (libstdc++ + libc++), cmake, ninja, gcovr
+# MSVC runs on windows-latest (native runner).
 
 name: CI
 
@@ -18,25 +20,88 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  IMAGE: ghcr.io/ai-warevo/ci-cpp20
+
 jobs:
   build-test:
     name: ${{ matrix.toolchain }} / ${{ matrix.build_type }}
-    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - toolchain: clang18-libcxx
-            os: ubuntu-24.04
-          - toolchain: gcc15
-            os: ubuntu-24.04
-          - toolchain: msvc
-            os: windows-latest
+          - os: linux
+            toolchain: clang18-libcxx
+          - os: linux
+            toolchain: gcc15
+          - os: windows
+            toolchain: msvc
+        build_type: [Debug, Release]
+
+    # Linux → container; Windows → native runner
+    runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'windows-latest' }}
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
+    if: ${{ matrix.os == 'linux' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          container_mode: true
+
+      # Every transport stub is switched on so that all of them are compiled (and -Werror'd) in CI.
+      - name: Configure & Build
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: ${{ matrix.build_type }}
+          extra_args: >-
+            ${{ steps.tc.outputs.cmake_args }}
+            -DTOBUS_WARNINGS_AS_ERRORS=ON
+            -DTOBUS_ENABLE_UNIX_SOCKET=ON
+            -DTOBUS_ENABLE_TCP_SERVER=ON
+            -DTOBUS_ENABLE_HTTP=ON
+            -DTOBUS_ENABLE_WEBSOCKET=ON
+            -DTOBUS_ENABLE_REDIS=ON
+            -DTOBUS_ENABLE_ZEROMQ=ON
+            -DTOBUS_ENABLE_RABBITMQ=ON
+            -DTOBUS_ENABLE_KAFKA=ON
+
+      - name: Run Tests
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: ${{ matrix.build_type }}
+          output_on_failure: true
+          timeout: 120
+
+      - name: Run example
+        run: ./build/examples/tobus_example_01_in_process
+
+  build-test-windows:
+    name: Windows ${{ matrix.toolchain }} / ${{ matrix.build_type }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [msvc]
         build_type: [Debug, Release]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install toolchain
         id: tc
@@ -72,12 +137,7 @@ jobs:
           output_on_failure: true
           timeout: 120
 
-      - name: Run example
-        if: runner.os != 'Windows'
-        run: ./build/examples/tobus_example_01_in_process
-
       - name: Run example (Windows)
-        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $exe = "./build/examples/tobus_example_01_in_process.exe"
@@ -88,21 +148,67 @@ jobs:
   # Default options (no transport stubs): this is what a consumer gets without enabling anything.
   build-test-default:
     name: default options / ${{ matrix.toolchain }}
-    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - toolchain: clang18-libcxx
-            os: ubuntu-24.04
-          - toolchain: gcc15
-            os: ubuntu-24.04
-          - toolchain: msvc
-            os: windows-latest
+          - os: linux
+            toolchain: clang18-libcxx
+          - os: linux
+            toolchain: gcc15
+          - os: windows
+            toolchain: msvc
+
+    runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'windows-latest' }}
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
+    if: ${{ matrix.os == 'linux' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          container_mode: true
+
+      - name: Configure & Build
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: Release
+          extra_args: >-
+            ${{ steps.tc.outputs.cmake_args }}
+            -DTOBUS_WARNINGS_AS_ERRORS=ON
+
+      - name: Run Tests
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: Release
+          output_on_failure: true
+          timeout: 120
+
+  build-test-default-windows:
+    name: Windows default options / ${{ matrix.toolchain }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [msvc]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install toolchain
         id: tc
@@ -116,7 +222,9 @@ jobs:
           source_dir: .
           build_dir: build
           build_type: Release
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_WARNINGS_AS_ERRORS=ON
+          extra_args: >-
+            ${{ steps.tc.outputs.cmake_args }}
+            -DTOBUS_WARNINGS_AS_ERRORS=ON
 
       - name: Run Tests
         uses: ai-warevo/.github/ci/actions/ctest-run@main

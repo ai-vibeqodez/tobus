@@ -3,6 +3,8 @@
 #   sanitizers  ASan+UBSan and TSan, full suite + 30x the concurrency tests
 #   stress      30x the concurrency tests in optimized builds (different timing, different races)
 #   coverage    gcc --coverage -> gcovr; the badge/report are published only from main
+#
+# All Linux jobs run inside ghcr.io/ai-warevo/ci-cpp20 (gcc-15, clang-18, cmake, ninja, gcovr).
 
 name: Test
 
@@ -20,19 +22,26 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  IMAGE: ghcr.io/ai-warevo/ci-cpp20
+
 jobs:
   lint:
     name: Lint (clang-format, clang-tidy)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install toolchain + tools
+      - name: Install toolchain
         id: tc
         uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: clang18-libcxx
+          container_mode: true
           tools: 'true'
 
       # The action ANDs its -name filters, so `extensions: cpp,hpp` would match no file at all: one step per extension.
@@ -82,7 +91,10 @@ jobs:
 
   sanitizers:
     name: ${{ matrix.name }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
     # The distro libc++/libc++abi are not ASan-instrumented: they allocate exception messages with the (intercepted)
     # operator new but release them with plain free(), which ASan reports as alloc-dealloc-mismatch on every
     # thrown std::runtime_error/logic_error. A toolchain false positive, not a tobus bug.
@@ -110,12 +122,14 @@ jobs:
         uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
+          container_mode: true
           sanitizer_runtime: 'true'
 
       # TSan maps shadow memory at fixed addresses; recent kernels' ASLR range makes it abort at startup.
+      # In container mode the kernel is the host kernel, so sysctl works.
       - name: Relax ASLR for ThreadSanitizer
         if: matrix.sanitizer == 'thread'
-        run: sudo sysctl vm.mmap_rnd_bits=28
+        run: sysctl vm.mmap_rnd_bits=28
 
       # AW_TPL_SANITIZE adds PUBLIC compile/link flags to aw::tpl, so tobus and the tests are instrumented as well.
       - name: Configure & Build
@@ -145,7 +159,10 @@ jobs:
 
   stress:
     name: Repeat concurrency tests 30x (${{ matrix.toolchain }}, Release)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
     strategy:
       fail-fast: false
       matrix:
@@ -160,6 +177,7 @@ jobs:
         uses: ai-warevo/.github/ci/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
+          container_mode: true
 
       - name: Configure & Build
         uses: ai-warevo/.github/ci/actions/cmake-build@main
@@ -176,20 +194,32 @@ jobs:
 
   coverage:
     name: Coverage
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       # The distro g++ (13): gcovr pins the `gcov` matching the default gcc, so build with that same compiler.
       # AW_TPL_ENABLE_COVERAGE adds PUBLIC --coverage flags to aw::tpl, which instruments tobus and the tests too.
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: gcc15
+          container_mode: true
+
       - name: Configure & Build
         uses: ai-warevo/.github/ci/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
           build_type: Debug
-          extra_args: -DAW_TPL_ENABLE_COVERAGE=ON
+          extra_args: >-
+            ${{ steps.tc.outputs.cmake_args }}
+            -DAW_TPL_ENABLE_COVERAGE=ON
 
       - name: Run Tests
         uses: ai-warevo/.github/ci/actions/ctest-run@main
