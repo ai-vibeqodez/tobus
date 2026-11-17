@@ -14,9 +14,7 @@ public:
     explicit Auth(IEventBus& bus)
         : bus_(bus) {}
 
-    void login(std::string name) {
-        bus_.publish(UserJoined{std::move(name)});
-    }
+    void login(std::string name) { bus_.publish(UserJoined{std::move(name)}); }
 
 private:
     IEventBus& bus_;

@@ -69,9 +69,8 @@ int main() {
     // Use it at shutdown or in tests; normal operation never needs to wait.
     bus->drain().wait();
 
-    std::cout << "\njoined=" << stats.joined << " sent=" << stats.sent
-              << " approved=" << stats.approved << " blocked=" << stats.blocked
-              << "\n";
+    std::cout << "\njoined=" << stats.joined << " sent=" << stats.sent << " approved=" << stats.approved
+              << " blocked=" << stats.blocked << "\n";
 
     return 0;
 }
