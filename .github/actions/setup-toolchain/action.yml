@@ -4,6 +4,7 @@
 #   clang18-libcxx   clang-18 + libc++   (the primary configuration; needs -fexperimental-library, added by aw::tpl)
 #   clang18-libstdcxx clang-18 + libstdc++ (used for TSan: libc++'s shared_ptr/atomics internals are not instrumented)
 #   gcc15            g++-15 + libstdc++  (from the ubuntu-toolchain-r/test PPA; ubuntu-24.04 ships up to g++-14)
+#   msvc             MSVC (Visual Studio 17+ on windows-latest)
 #
 # Usage:
 #   - id: tc
@@ -13,11 +14,11 @@
 #     with: { extra_args: "${{ steps.tc.outputs.cmake_args }} -DTOBUS_WARNINGS_AS_ERRORS=ON" }
 
 name: 'Setup toolchain'
-description: 'Install clang-18 (libc++ or libstdc++) or g++-15 and output the CMake arguments that select it'
+description: 'Install clang-18 (libc++ or libstdc++) or g++-15 or MSVC and output the CMake arguments that select it'
 
 inputs:
   toolchain:
-    description: 'clang18-libcxx | clang18-libstdcxx | gcc15'
+    description: 'clang18-libcxx | clang18-libstdcxx | gcc15 | msvc'
     required: true
   sanitizer_runtime:
     description: 'Also install the clang sanitizer runtimes (libclang-rt-18-dev)'
@@ -37,6 +38,7 @@ runs:
   using: 'composite'
   steps:
     - name: Install packages
+      if: inputs.toolchain != 'msvc'
       shell: bash
       env:
         TOOLCHAIN: ${{ inputs.toolchain }}
@@ -68,6 +70,10 @@ runs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
         fi
 
+    - name: Setup MSVC environment
+      if: inputs.toolchain == 'msvc'
+      uses: ilammy/msvc-dev-cmd@v1
+
     - name: Compute CMake arguments
       id: args
       shell: bash
@@ -82,5 +88,7 @@ runs:
             ARGS="-GNinja -DCMAKE_CXX_COMPILER=clang++-18" ;;
           gcc15)
             ARGS="-GNinja -DCMAKE_CXX_COMPILER=g++-15" ;;
+          msvc)
+            ARGS="-GNinja" ;;
         esac
         echo "cmake_args=$ARGS" >> "$GITHUB_OUTPUT"
