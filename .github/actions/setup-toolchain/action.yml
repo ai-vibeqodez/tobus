@@ -58,8 +58,8 @@ runs:
         esac
         if [ "$SANITIZER_RUNTIME" = "true" ]; then PKGS+=(libclang-rt-18-dev); fi
         if [ "$TOOLS" = "true" ]; then PKGS+=(clang-format-18 clang-tidy-18); fi
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends "${PKGS[@]}"
+        sudo apt-get update || true
+        sudo apt-get install -y --fix-missing --no-install-recommends "${PKGS[@]}" || sudo apt-get install -y --fix-missing --no-install-recommends "${PKGS[@]}"
         if [ "$TOOLS" = "true" ]; then
           # The CI actions call plain `clang-format` / `clang-tidy`: point them at version 18.
           mkdir -p "$HOME/.local/bin"
