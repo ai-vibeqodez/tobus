@@ -21,11 +21,17 @@ concurrency:
 jobs:
   build-test:
     name: ${{ matrix.toolchain }} / ${{ matrix.build_type }}
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [clang18-libcxx, gcc15]
+        include:
+          - toolchain: clang18-libcxx
+            os: ubuntu-24.04
+          - toolchain: gcc15
+            os: ubuntu-24.04
+          - toolchain: msvc
+            os: windows-latest
         build_type: [Debug, Release]
 
     steps:
@@ -67,16 +73,32 @@ jobs:
           timeout: 120
 
       - name: Run example
+        if: runner.os != 'Windows'
         run: ./build/examples/tobus_example_01_in_process
+
+      - name: Run example (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $exe = "./build/examples/tobus_example_01_in_process.exe"
+          Write-Host "=== tobus_example_01_in_process"
+          & $exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   # Default options (no transport stubs): this is what a consumer gets without enabling anything.
   build-test-default:
     name: default options / ${{ matrix.toolchain }}
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [clang18-libcxx, gcc15]
+        include:
+          - toolchain: clang18-libcxx
+            os: ubuntu-24.04
+          - toolchain: gcc15
+            os: ubuntu-24.04
+          - toolchain: msvc
+            os: windows-latest
 
     steps:
       - name: Checkout

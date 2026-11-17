@@ -28,11 +28,17 @@ concurrency:
 jobs:
   add-subdirectory:
     name: add_subdirectory (${{ matrix.toolchain }})
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [clang18-libcxx, gcc15]
+        include:
+          - toolchain: clang18-libcxx
+            os: ubuntu-24.04
+          - toolchain: gcc15
+            os: ubuntu-24.04
+          - toolchain: msvc
+            os: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,11 +66,17 @@ jobs:
 
   find-package:
     name: find_package (${{ matrix.toolchain }})
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [clang18-libcxx, gcc15]
+        include:
+          - toolchain: clang18-libcxx
+            os: ubuntu-24.04
+          - toolchain: gcc15
+            os: ubuntu-24.04
+          - toolchain: msvc
+            os: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -101,11 +113,17 @@ jobs:
 
   fetch-content:
     name: FetchContent (${{ matrix.toolchain }})
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [clang18-libcxx, gcc15]
+        include:
+          - toolchain: clang18-libcxx
+            os: ubuntu-24.04
+          - toolchain: gcc15
+            os: ubuntu-24.04
+          - toolchain: msvc
+            os: windows-latest
     env:
       # PR: the head commit of the PR's own repository (works for forks too); otherwise the pushed commit.
       TOBUS_URL: ${{ github.event.pull_request.head.repo.clone_url || format('{0}/{1}.git', github.server_url, github.repository) }}
