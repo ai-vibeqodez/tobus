@@ -14,6 +14,8 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-18
+
 ### Added
 
 - `IEventBus`: transport-agnostic bus with typed, non-virtual `publish<T>()` / `subscribe<T>()` over type-erased virtuals; fire-and-forget publish, coroutine handlers (`EventHandler<T>` = `std::function<Task<void>(const T&)>`), `drain()`.
@@ -36,4 +38,6 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 ### Fixed
 
 - `VERSION` was hidden by the template's `version` rule in `.gitignore` (case-insensitive matching), so a `FetchContent` clone could not configure.
+- `compile_commands.json` is now exported (clang-tidy needs it).
+
 - `compile_commands.json` is now exported (clang-tidy needs it).
