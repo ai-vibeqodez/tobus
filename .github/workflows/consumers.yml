@@ -49,13 +49,18 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
 
+      - name: Normalize workspace path
+        id: ws
+        run: echo "path=$(echo '${{ github.workspace }}' | tr '\\' '/')" >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: Configure & Build consumer
         uses: ai-warevo/.github/ci/actions/cmake-build@main
         with:
           source_dir: ci/consumers/add_subdirectory
           build_dir: build
           build_type: Release
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ github.workspace }}
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ steps.ws.outputs.path }}
 
       - name: Run consumer
         uses: ai-warevo/.github/ci/actions/ctest-run@main
@@ -87,6 +92,11 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
 
+      - name: Normalize workspace path
+        id: ws
+        run: echo "path=$(echo '${{ github.workspace }}' | tr '\\' '/')" >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: Build & install tobus (+ aw_tpl)
         uses: ai-warevo/.github/ci/actions/cmake-build@main
         with:
@@ -94,7 +104,7 @@ jobs:
           build_dir: build
           build_type: Release
           install: true
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_BUILD_TESTS=OFF -DTOBUS_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/prefix
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_BUILD_TESTS=OFF -DTOBUS_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=${{ steps.ws.outputs.path }}/prefix
 
       - name: Configure & Build consumer
         uses: ai-warevo/.github/ci/actions/cmake-build@main
@@ -102,7 +112,7 @@ jobs:
           source_dir: ci/consumers/find_package
           build_dir: build
           build_type: Release
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/prefix
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DCMAKE_PREFIX_PATH=${{ steps.ws.outputs.path }}/prefix
 
       - name: Run consumer
         uses: ai-warevo/.github/ci/actions/ctest-run@main
