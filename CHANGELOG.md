@@ -14,6 +14,12 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-18
+
+### Added
+
+- add script updater with auto-sync and pre-flight checks
+
 ## [0.2.0] - 2026-11-18
 
 ### Added
