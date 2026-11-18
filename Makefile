@@ -15,7 +15,7 @@
 BUILD_TYPE ?= Debug
 PRESET     := $(if $(filter Release,$(BUILD_TYPE)),release,debug)
 
-.PHONY: build test clean lint format release release-dry-run changelog changelog-dry-run
+.PHONY: build test clean lint format release release-dry-run changelog changelog-dry-run update
 
 build:
 	cmake --preset $(PRESET)
@@ -64,8 +64,16 @@ else
 endif
 
 changelog-dry-run:
-ifneq ($(IS_POSIX),1)
-	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 -DryRun
-else
+ifeq ($(IS_POSIX),1)
 	bash scripts/changelog-update.sh --dry-run
+else
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 -DryRun
+endif
+
+# Update all scripts from ai-warevo/.github.
+update:
+ifeq ($(IS_POSIX),1)
+	bash scripts/updater.sh
+else
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/updater.ps1
 endif
