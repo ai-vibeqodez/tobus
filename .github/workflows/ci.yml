@@ -20,9 +20,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  IMAGE: ghcr.io/ai-warevo/ci-cpp23
-
 jobs:
   build-test:
     name: ${{ matrix.toolchain }} / ${{ matrix.build_type }}
@@ -41,7 +38,7 @@ jobs:
     # Linux → container; Windows → native runner
     runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'windows-latest' }}
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     if: ${{ matrix.os == 'linux' }}
 
@@ -161,7 +158,7 @@ jobs:
 
     runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'windows-latest' }}
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     if: ${{ matrix.os == 'linux' }}
 

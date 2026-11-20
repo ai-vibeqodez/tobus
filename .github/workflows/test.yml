@@ -22,15 +22,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  IMAGE: ghcr.io/ai-warevo/ci-cpp23
-
 jobs:
   lint:
     name: Lint (clang-format, clang-tidy)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     steps:
       - name: Checkout
@@ -93,7 +90,7 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     # The distro libc++/libc++abi are not ASan-instrumented: they allocate exception messages with the (intercepted)
     # operator new but release them with plain free(), which ASan reports as alloc-dealloc-mismatch on every
@@ -161,7 +158,7 @@ jobs:
     name: Repeat concurrency tests 30x (${{ matrix.toolchain }}, Release)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     strategy:
       fail-fast: false
@@ -196,7 +193,7 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     steps:
       - name: Checkout

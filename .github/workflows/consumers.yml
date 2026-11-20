@@ -28,9 +28,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  IMAGE: ghcr.io/ai-warevo/ci-cpp23
-
 jobs:
   # ────────────────────────────────────────────────────────────
   # ADD_SUBDIRECTORY — Linux (container)
@@ -39,7 +36,7 @@ jobs:
     name: add_subdirectory (${{ matrix.toolchain }})
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     strategy:
       fail-fast: false
@@ -109,7 +106,7 @@ jobs:
     name: find_package (${{ matrix.toolchain }})
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     strategy:
       fail-fast: false
@@ -205,7 +202,7 @@ jobs:
     name: FetchContent (${{ matrix.toolchain }})
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     strategy:
       fail-fast: false
