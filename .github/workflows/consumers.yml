@@ -7,7 +7,7 @@
 # fetch_content clones from the network, so it only means something once the commit is pushed; it is pinned to the
 # exact commit being tested (PR head / pushed sha) rather than `main`, so a PR tests itself.
 #
-# Linux jobs run inside ghcr.io/ai-warevo/ci-cpp20 (linux/amd64).
+# Linux jobs run inside ghcr.io/ai-warevo/ci-cpp23 (linux/amd64).
 # MSVC runs on windows-latest (native runner).
 
 name: Consumers
@@ -29,7 +29,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE: ghcr.io/ai-warevo/ci-cpp20
+  IMAGE: ghcr.io/ai-warevo/ci-cpp23
 
 jobs:
   # ────────────────────────────────────────────────────────────
