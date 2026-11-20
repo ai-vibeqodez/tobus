@@ -1,0 +1,27 @@
+# Fast pull-request checks shared by the C++ projects in ai-warevo.
+# The repository-specific matrix and consumer checks remain in ci.yml and consumers.yml.
+
+name: PR Fast
+
+on:
+  pull_request:
+    branches: [main, master]
+  merge_group:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ai-warevo/.github/.github/workflows/reusable-pr-fast.yml@main
+    with:
+      source_dir: .
+      build_dir: build-pr-fast
+      build_type: Debug
+      extra_args: >-
+        -DTOBUS_BUILD_TESTS=ON
+        -DTOBUS_BUILD_EXAMPLES=ON
+        -DTOBUS_WARNINGS_AS_ERRORS=ON
+      extensions: cpp,hpp
+      container_image: ghcr.io/ai-warevo/ci-cpp23

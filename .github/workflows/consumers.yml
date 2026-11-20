@@ -51,13 +51,13 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
 
       - name: Configure & Build consumer
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: ci/consumers/add_subdirectory
           build_dir: build
@@ -65,7 +65,7 @@ jobs:
           extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ github.workspace }}
 
       - name: Run consumer
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: ci/consumers/add_subdirectory
           build_dir: build
@@ -83,12 +83,12 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: msvc
 
       - name: Configure & Build consumer
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: ci/consumers/add_subdirectory
           build_dir: build
@@ -96,7 +96,7 @@ jobs:
           extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ github.workspace }}
 
       - name: Run consumer
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: ci/consumers/add_subdirectory
           build_dir: build
@@ -121,13 +121,13 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
 
       - name: Build & install tobus (+ aw_tpl)
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -140,7 +140,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/prefix
 
       - name: Configure & Build consumer
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: ci/consumers/find_package
           build_dir: build
@@ -148,7 +148,7 @@ jobs:
           extra_args: ${{ steps.tc.outputs.cmake_args }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/prefix
 
       - name: Run consumer
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: ci/consumers/find_package
           build_dir: build
@@ -166,12 +166,12 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: msvc
 
       - name: Build & install tobus (+ aw_tpl)
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -184,7 +184,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/prefix
 
       - name: Configure & Build consumer
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: ci/consumers/find_package
           build_dir: build
@@ -192,7 +192,7 @@ jobs:
           extra_args: ${{ steps.tc.outputs.cmake_args }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/prefix
 
       - name: Run consumer
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: ci/consumers/find_package
           build_dir: build
@@ -221,13 +221,13 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
 
       - name: Configure & Build consumer (fetches tobus ${{ env.TOBUS_TAG }})
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: ci/consumers/fetch_content
           build_dir: build
@@ -235,7 +235,7 @@ jobs:
           extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_GIT_URL=${{ env.TOBUS_URL }} -DTOBUS_GIT_TAG=${{ env.TOBUS_TAG }}
 
       - name: Run consumer
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: ci/consumers/fetch_content
           build_dir: build
@@ -256,12 +256,12 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: msvc
 
       - name: Configure & Build consumer (fetches tobus ${{ env.TOBUS_TAG }})
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: ci/consumers/fetch_content
           build_dir: build
@@ -269,7 +269,7 @@ jobs:
           extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_GIT_URL=${{ env.TOBUS_URL }} -DTOBUS_GIT_TAG=${{ env.TOBUS_TAG }}
 
       - name: Run consumer
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: ci/consumers/fetch_content
           build_dir: build

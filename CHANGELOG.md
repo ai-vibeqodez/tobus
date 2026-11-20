@@ -19,6 +19,10 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 - `BinaryEventTraits<T>` — pre-built trait: `std::memcpy` for trivially-copyable types (≤ 255 bytes), or custom `to_binary()` / `from_binary()` for complex types.
 - `JsonEventTraits<T>` — pre-built trait serialising to/from JSON via `nlohmann::json` (requires `TOBUS_ENABLE_JSON`).
 
+### Changed
+
+- Integrated the shared `ai-warevo/.github` composite actions and reusable PR/release workflows.
+
 ## [0.4.0] - 2026-11-20
 
 ### Added
@@ -62,6 +66,4 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 ### Fixed
 
 - `VERSION` was hidden by the template's `version` rule in `.gitignore` (case-insensitive matching), so a `FetchContent` clone could not configure.
-- `compile_commands.json` is now exported (clang-tidy needs it).
-
 - `compile_commands.json` is now exported (clang-tidy needs it).
