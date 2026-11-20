@@ -38,7 +38,7 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: clang18-libcxx
           container_mode: true
@@ -46,19 +46,19 @@ jobs:
 
       # The action ANDs its -name filters, so `extensions: cpp,hpp` would match no file at all: one step per extension.
       - name: clang-format (.hpp)
-        uses: ai-warevo/.github/ci/actions/clang-format@main
+        uses: ai-warevo/.github/.github/actions/clang-format@main
         with:
           source_dir: .
           extensions: hpp
       - name: clang-format (.cpp)
-        uses: ai-warevo/.github/ci/actions/clang-format@main
+        uses: ai-warevo/.github/.github/actions/clang-format@main
         with:
           source_dir: .
           extensions: cpp
 
       # Configure + build: clang-tidy needs compile_commands.json and the fetched dependencies.
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -77,16 +77,16 @@ jobs:
       # The checks come from .clang-tidy (the action merges `checks` with it, so a no-op value is passed on purpose;
       # the action's default list is not wanted). Scanned per directory: ci/consumers is not in compile_commands.json.
       - name: clang-tidy (include)
-        uses: ai-warevo/.github/ci/actions/clang-tidy@main
+        uses: ai-warevo/.github/.github/actions/clang-tidy@main
         with: { source_dir: include, build_dir: ../build, checks: '-llvmlibc-*', header_filter: '.*/tobus/(include|src)/.*' }
       - name: clang-tidy (src)
-        uses: ai-warevo/.github/ci/actions/clang-tidy@main
+        uses: ai-warevo/.github/.github/actions/clang-tidy@main
         with: { source_dir: src, build_dir: ../build, checks: '-llvmlibc-*', header_filter: '.*/tobus/(include|src)/.*' }
       - name: clang-tidy (examples)
-        uses: ai-warevo/.github/ci/actions/clang-tidy@main
+        uses: ai-warevo/.github/.github/actions/clang-tidy@main
         with: { source_dir: examples, build_dir: ../build, checks: '-llvmlibc-*', header_filter: '.*/tobus/(include|src)/.*' }
       - name: clang-tidy (tests)
-        uses: ai-warevo/.github/ci/actions/clang-tidy@main
+        uses: ai-warevo/.github/.github/actions/clang-tidy@main
         with: { source_dir: tests, build_dir: ../build, checks: '-llvmlibc-*', header_filter: '.*/tobus/(include|src)/.*' }
 
   sanitizers:
@@ -119,7 +119,7 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
@@ -133,7 +133,7 @@ jobs:
 
       # AW_TPL_SANITIZE adds PUBLIC compile/link flags to aw::tpl, so tobus and the tests are instrumented as well.
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -141,7 +141,7 @@ jobs:
           extra_args: ${{ steps.tc.outputs.cmake_args }} -DAW_TPL_SANITIZE=${{ matrix.sanitizer }}
 
       - name: Run Tests
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: .
           build_dir: build
@@ -174,13 +174,13 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
 
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -206,13 +206,13 @@ jobs:
       # AW_TPL_ENABLE_COVERAGE adds PUBLIC --coverage flags to aw::tpl, which instruments tobus and the tests too.
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: gcc15
           container_mode: true
 
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -222,7 +222,7 @@ jobs:
             -DAW_TPL_ENABLE_COVERAGE=ON
 
       - name: Run Tests
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: .
           build_dir: build
@@ -231,7 +231,7 @@ jobs:
           timeout: 300
 
       - name: Generate Coverage Reports (XML & HTML)
-        uses: ai-warevo/.github/ci/actions/gcovr-report@main
+        uses: ai-warevo/.github/.github/actions/gcovr-report@main
         with:
           source_dir: .
           build_dir: build
@@ -243,14 +243,14 @@ jobs:
       - name: Parse Coverage Metrics
         id: coverage_parser
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: ai-warevo/.github/ci/actions/coverage-parser@main
+        uses: ai-warevo/.github/.github/actions/coverage-parser@main
         with:
           xml_path: coverage.xml
 
       - name: Generate Coverage Badge
         id: badge_generator
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: ai-warevo/.github/ci/actions/badge@main
+        uses: ai-warevo/.github/.github/actions/badge@main
         with:
           width: '99'
           height: '20'
@@ -261,12 +261,12 @@ jobs:
 
       - name: Deploy Badge
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: ai-warevo/.github/ci/actions/badge-deploy@main
+        uses: ai-warevo/.github/.github/actions/badge-deploy@main
         with:
           badge_path: coverage.svg
 
       - name: Deploy Coverage Report to gh-pages
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: ai-warevo/.github/ci/actions/coverage-html-deploy@main
+        uses: ai-warevo/.github/.github/actions/coverage-html-deploy@main
         with:
           folder: htmlcov

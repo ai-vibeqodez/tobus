@@ -133,6 +133,18 @@ cmake --preset dev && cmake --build --preset dev && ctest --preset dev
 cmake --preset clang18-libcxx && cmake --build --preset clang18-libcxx && ctest --preset clang18-libcxx
 ```
 
+## CI/CD
+
+GitHub Actions uses shared infrastructure from [`ai-warevo/.github`](https://github.com/ai-warevo/.github):
+
+- `pr-fast.yml` runs the common formatting, clang-tidy, build, and test checks.
+- `ci.yml` keeps the project-specific toolchain matrix and compiles every transport option.
+- `test.yml` runs sanitizers, stress tests, and coverage.
+- `consumers.yml` verifies `add_subdirectory`, `find_package`, and `FetchContent` integration.
+- `release.yml` delegates version resolution, changelog promotion, and GitHub Release creation to the shared reusable workflow.
+
+The project-specific workflows use catalog composite actions through `ai-warevo/.github/.github/actions`; actions are not copied into this repository.
+
 ## 📄 License
 
 MIT. See the `LICENSE` file for details.

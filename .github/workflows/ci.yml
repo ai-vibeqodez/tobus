@@ -51,14 +51,14 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
 
       # Every transport stub is switched on so that all of them are compiled (and -Werror'd) in CI.
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -76,7 +76,7 @@ jobs:
             -DTOBUS_ENABLE_KAFKA=ON
 
       - name: Run Tests
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: .
           build_dir: build
@@ -105,13 +105,13 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
 
       # Every transport stub is switched on so that all of them are compiled (and -Werror'd) in CI.
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -129,7 +129,7 @@ jobs:
             -DTOBUS_ENABLE_KAFKA=ON
 
       - name: Run Tests
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: .
           build_dir: build
@@ -171,13 +171,13 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
 
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -187,7 +187,7 @@ jobs:
             -DTOBUS_WARNINGS_AS_ERRORS=ON
 
       - name: Run Tests
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: .
           build_dir: build
@@ -212,12 +212,12 @@ jobs:
 
       - name: Install toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: ${{ matrix.toolchain }}
 
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -227,7 +227,7 @@ jobs:
             -DTOBUS_WARNINGS_AS_ERRORS=ON
 
       - name: Run Tests
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: .
           build_dir: build
