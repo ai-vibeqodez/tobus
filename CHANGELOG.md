@@ -14,6 +14,11 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+### Added
+
+- Implemented `HTTPBus` as a bounded in-memory HTTP relay with server/client roles, POST publishing, and client polling.
+- Implemented the shared `FramedBus` local delivery, serialization, and receive path.
+
 ## [0.3.0] - 2026-11-18
 
 ### Added

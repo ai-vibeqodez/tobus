@@ -6,6 +6,7 @@ aw_test_target(NAME tobus
         test_subscription.cpp
         test_factory.cpp
         test_stubs.cpp
+        test_http_bus.cpp
     LINK_TARGET aw::tobus)
 
 # The cases tagged [threads] (concurrent publishers, subscribe/unsubscribe races, ...) as one named CTest entry, so CI

@@ -63,7 +63,7 @@ TEST_CASE("an out-of-range transport kind is unavailable", "[factory]") {
 
 TEST_CASE("a compiled-in stub transport reports that it is not implemented", "[factory]") {
     for (const TransportKind kind : all_transport_kinds) {
-        if (kind == TransportKind::in_process || !EventBusFactory::is_available(kind)) {
+        if (kind == TransportKind::in_process || kind == TransportKind::http || !EventBusFactory::is_available(kind)) {
             continue;
         }
         EventBusConfig cfg;

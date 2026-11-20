@@ -2,15 +2,11 @@
 
 /**
  * @file framed_bus.hpp
- * @brief @c FramedBus: foundation for network transports (STUB). Not part of the MVP implementation.
+ * @brief @c FramedBus: shared implementation for transports that move serialized frames.
  *
- * Contract for the future implementation (see @c InProcessBus as the reference):
- *  - @c publish_raw: deliver to local subscribers directly through the shared dispatcher (no serialization),
- *    then, if the type is serializable, encode it into a @c Frame stamped with @c origin_id() and @c send_frame() it.
- *    A non-serializable type is reported to @c EventBusConfig::on_error (safety net; @c subscribe already rejects it).
- *  - @c subscribe_raw: throw @c NotSerializable if the type cannot be encoded (surfaces at startup), else register
- *    the handler and remember the type's @c decode so received frames can be turned back into events.
- *  - @c receive_frame: drop frames whose origin is this bus (own echo), otherwise decode and dispatch.
+ *  - @c publish_raw: deliver locally through the shared dispatcher, then encode and send serializable events.
+ *  - @c subscribe_raw: require a codec, register the handler and remember the type decoder.
+ *  - @c receive_frame: drop frames originating at this bus, otherwise decode and dispatch.
  */
 
 #include <aw/tobus/event_bus.hpp>
@@ -19,6 +15,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
+#include <unordered_map>
 #include <vector>
 
 namespace aw::tobus::detail {
@@ -47,21 +45,24 @@ public:
     /// Random id of this bus instance, stamped into every outgoing frame.
     [[nodiscard]] std::uint64_t origin_id() const noexcept { return origin_id_; }
 
-    /// TODO: implement (await the shared dispatcher, like InProcessBus).
+    /// Completes when all local handler deliveries started so far have finished.
     [[nodiscard]] Task<void> drain() override;
 
 protected:
-    /// TODO: implement as described in the file comment.
+    /// Delivers locally and sends a serialized frame when the event has a codec.
     void publish_raw(const EventTypeInfo& type, std::shared_ptr<const void> event) override;
 
-    /// TODO: implement as described in the file comment.
+    /// Requires a codec and registers the handler for matching received frames.
     Subscription subscribe_raw(const EventTypeInfo& type, RawEventHandler handler) override;
 
     /// Transports implement this: write @p frame to the wire (must not block the caller).
     virtual void send_frame(const Frame& frame) = 0;
 
-    /// TODO: implement: transports call this for every received frame.
+    /// Decodes and dispatches a received frame, dropping this bus's own echo.
     void receive_frame(const Frame& frame);
+
+    /// Reports an asynchronous transport failure through the configured error handler.
+    void report_transport_error(const std::exception_ptr& error) noexcept;
 
     /// Throws @c NotSerializable unless @p type is named and has a codec.
     static void require_serializable(const EventTypeInfo& type);
@@ -71,7 +72,9 @@ protected:
 private:
     EventBusConfig config_;
     std::uint64_t origin_id_;
-    // TODO: std::shared_ptr<detail::Dispatcher> dispatcher_; map EventTypeId -> EventTypeInfo::decode.
+    std::shared_ptr<detail::Dispatcher> dispatcher_;
+    mutable std::mutex decoders_mtx_;
+    std::unordered_map<EventTypeId, EventTypeInfo> event_types_;
 };
 
 } // namespace aw::tobus

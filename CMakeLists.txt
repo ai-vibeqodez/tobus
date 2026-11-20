@@ -24,7 +24,7 @@ option(TOBUS_WARNINGS_AS_ERRORS "Build tobus with strict warnings treated as err
 # Transports. InProcessBus is always built; the others are stubs for now and OFF by default.
 option(TOBUS_ENABLE_UNIX_SOCKET "Build the UnixSocketBus stub" OFF)
 option(TOBUS_ENABLE_TCP_SERVER "Build the TCPServerBus stub" OFF)
-option(TOBUS_ENABLE_HTTP "Build the HTTPBus stub" OFF)
+option(TOBUS_ENABLE_HTTP "Build the HTTPBus transport" OFF)
 option(TOBUS_ENABLE_WEBSOCKET "Build the WebSocketBus stub" OFF)
 option(TOBUS_ENABLE_REDIS "Enable the RedisBus stub (header-only)" OFF)
 option(TOBUS_ENABLE_ZEROMQ "Enable the ZeroMQBus stub (header-only)" OFF)

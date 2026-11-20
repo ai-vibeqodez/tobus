@@ -68,30 +68,26 @@ TEST_CASE("the header-only broker stubs throw TransportNotImplemented", "[stubs]
     REQUIRE_THROWS_AS(KafkaBus(EventBusConfig{}), TransportNotImplemented);
 }
 
-#if TOBUS_HAS_UNIX_SOCKET && TOBUS_HAS_TCP_SERVER && TOBUS_HAS_HTTP && TOBUS_HAS_WEBSOCKET
-TEST_CASE("the socket stubs throw TransportNotImplemented", "[stubs]") {
+#if TOBUS_HAS_UNIX_SOCKET && TOBUS_HAS_TCP_SERVER && TOBUS_HAS_WEBSOCKET
+TEST_CASE("unimplemented socket transports throw TransportNotImplemented", "[stubs]") {
     REQUIRE_THROWS_AS(UnixSocketBus(EventBusConfig{}), TransportNotImplemented);
     REQUIRE_THROWS_AS(TCPServerBus(EventBusConfig{}), TransportNotImplemented);
-    REQUIRE_THROWS_AS(HTTPBus(EventBusConfig{}), TransportNotImplemented);
     REQUIRE_THROWS_AS(WebSocketBus(EventBusConfig{}), TransportNotImplemented);
 }
 #endif
 
-TEST_CASE("FramedBus foundation: origin ids, serializability check, TODO bodies", "[stubs]") {
+TEST_CASE("FramedBus foundation: origin ids and serializability check", "[stubs]") {
     Probe a;
     Probe b;
     REQUIRE(a.origin_id() != b.origin_id());
 
-    // Non-serializable types are rejected (this is what subscribe() will use on a network transport).
     REQUIRE_THROWS_AS(Probe::require_serializable(event_type_info<Plain>()), NotSerializable);
     REQUIRE_NOTHROW(Probe::require_serializable(event_type_info<Wire>()));
-
-    // The transport-agnostic parts are still TODO and say so.
-    REQUIRE_THROWS_AS(a.drain(), TransportNotImplemented);
-    REQUIRE_THROWS_AS(a.publish_raw(event_type_info<Wire>(), std::make_shared<const Wire>()), TransportNotImplemented);
-    REQUIRE_THROWS_AS(a.subscribe_raw(event_type_info<Wire>(), [](const void*) -> Task<void> { co_return; }),
-                      TransportNotImplemented);
-    REQUIRE_THROWS_AS(a.receive_frame(FramedBus::Frame{}), TransportNotImplemented);
+    REQUIRE_NOTHROW(a.drain().wait());
+    REQUIRE_NOTHROW(a.publish_raw(event_type_info<Wire>(), std::make_shared<const Wire>()));
+    auto sub = a.subscribe_raw(event_type_info<Wire>(), [](const void*) -> Task<void> { co_return; });
+    REQUIRE(sub.active());
+    REQUIRE_NOTHROW(a.receive_frame(FramedBus::Frame{b.origin_id(), event_type_info<Wire>().id, {}}));
 }
 
 TEST_CASE("error messages are actionable", "[stubs]") {

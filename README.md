@@ -84,10 +84,11 @@ Network transports throw `NotSerializable` on `subscribe<T>()` if no codec is de
 | Transport | Status | CMake Option |
 |---|---|---|
 | `InProcessBus` | implemented | always enabled |
-| `UnixSocketBus`, `TCPServerBus`, `HTTPBus`, `WebSocketBus` | stub (`// TODO: implement`) | `TOBUS_ENABLE_UNIX_SOCKET`, `_TCP_SERVER`, `_HTTP`, `_WEBSOCKET` |
+| `HTTPBus` | implemented (relay server/client) | `TOBUS_ENABLE_HTTP` |
+| `UnixSocketBus`, `TCPServerBus`, `WebSocketBus` | stub (`// TODO: implement`) | `TOBUS_ENABLE_UNIX_SOCKET`, `_TCP_SERVER`, `_WEBSOCKET` |
 | `RedisBus`, `ZeroMQBus`, `RabbitMQBus`, `KafkaBus` | header-only stub | `TOBUS_ENABLE_REDIS`, `_ZEROMQ`, `_RABBITMQ`, `_KAFKA` |
 
-`FramedBus` is designed as a base class for network transports (sending and receiving frames; the contract is described in the header). When implementing new transports, use `InProcessBus` and `detail::Dispatcher` as a reference.
+`FramedBus` provides type-erased serialization, local delivery and echo filtering for network transports. `HTTPBus` requires an `EventTraits<T>` codec for every subscribed event type and uses POSIX sockets. Configure one instance as a server and other instances as clients. A server binds `endpoint = "127.0.0.1:8080"` with `options["role"] = "server"`; a client uses `endpoint = "http://127.0.0.1:8080"` with `options["role"] = "client"`. Clients publish with `POST /publish` and receive events by polling `GET /poll`. `publish()` queues frames locally and does not wait for network I/O; `drain()` waits for local handlers, not network transmission. The relay retains the latest 4096 frames in memory; it is intended for trusted networks and does not provide authentication or durable delivery. The three-process example is in `examples/http_relay/`: run `tobus_example_http_relay_server`, then `tobus_example_http_relay_subscriber` and `tobus_example_http_relay_publisher` in separate terminals.
 
 Attempting to create an uncompiled transport via `EventBusFactory::create` will throw `TransportNotAvailable` with the required CMake option indicated.
 
