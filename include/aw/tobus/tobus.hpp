@@ -5,6 +5,12 @@
  * @brief Umbrella header: everything a module needs to publish and subscribe, and everything an application
  *        needs to create a bus. Transport classes are deliberately NOT included: pick them through
  *        @c EventBusFactory (or include @c aw/tobus/transports/... explicitly).
+ *
+ * Pre-built @c EventTraits specialisations live in @c aw/tobus/event_traits/ — include them explicitly:
+ * @code
+ * #include <aw/tobus/event_traits/binary_event_traits.hpp>
+ * #include <aw/tobus/event_traits/json_event_traits.hpp>  // requires -DTOBUS_ENABLE_JSON
+ * @endcode
  */
 
 #include <aw/tobus/errors.hpp>

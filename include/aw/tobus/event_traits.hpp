@@ -15,6 +15,21 @@
  * };
  * @endcode
  * tobus defines no wire format: the codec is yours.
+ *
+ * Pre-built specialisations are available in @c aw/tobus/event_traits/:
+ * - @c BinaryEventTraits<T> — serialises trivially-copyable types (≤ 255 bytes) with @c std::memcpy,
+ *   or supports custom @c to_binary()/@c from_binary() for complex types.
+ * - @c JsonEventTraits<T> — serialises to/from JSON via @c nlohmann/json. Requires @c TOBUS_ENABLE_JSON.
+ *
+ * Example with a pre-built trait:
+ * @code
+ * struct TemperatureReading { std::uint32_t sequence; std::int32_t celsius; };
+ *
+ * template <> struct aw::tobus::EventTraits<TemperatureReading>
+ *     : aw::tobus::BinaryEventTraits<TemperatureReading> {
+ *     static constexpr std::string_view name = "example.http_relay.TemperatureReading";
+ * };
+ * @endcode
  */
 
 #include <aw/tobus/event_type_id.hpp>

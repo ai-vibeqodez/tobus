@@ -77,6 +77,22 @@ template <> struct aw::tobus::EventTraits<Ping> {
 };
 ```
 
+### Pre-built traits
+
+For common patterns the library ships ready-made trait bases so you do not write boilerplate:
+
+- **`BinaryEventTraits<T>`** — for trivially-copyable types (≤ 255 bytes) it uses `std::memcpy`; for complex types you provide `to_binary()` / `from_binary()`.
+- **`JsonEventTraits<T>`** — serialises to JSON via `nlohmann::json`. Requires `TOBUS_ENABLE_JSON`.
+
+```cpp
+struct TemperatureReading { std::uint32_t sequence; std::int32_t celsius; };
+
+template <> struct aw::tobus::EventTraits<TemperatureReading>
+    : aw::tobus::BinaryEventTraits<TemperatureReading> {
+    static constexpr std::string_view name = "example.http_relay.TemperatureReading";
+};
+```
+
 Network transports throw `NotSerializable` on `subscribe<T>()` if no codec is defined for `T` (a startup configuration error), and forward it to `on_error` on `publish<T>()` as a safeguard. Local subscribers of the publisher always receive events directly; transports discard their own echo based on the `origin id` in the frame header.
 
 ## 🚏 Transports (Routes)

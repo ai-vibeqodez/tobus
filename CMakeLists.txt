@@ -30,6 +30,7 @@ option(TOBUS_ENABLE_REDIS "Enable the RedisBus stub (header-only)" OFF)
 option(TOBUS_ENABLE_ZEROMQ "Enable the ZeroMQBus stub (header-only)" OFF)
 option(TOBUS_ENABLE_RABBITMQ "Enable the RabbitMQBus stub (header-only)" OFF)
 option(TOBUS_ENABLE_KAFKA "Enable the KafkaBus stub (header-only)" OFF)
+option(TOBUS_ENABLE_JSON "Build with nlohmann/json support for JsonEventTraits" OFF)
 
 # Compiler warnings (must come after project() so CMAKE_CXX_COMPILER_ID is known).
 # AW_WARNINGS is shared with the tests; AW_STRICT_WARNINGS (opt-in -Werror) only applies to the library and examples.
@@ -59,6 +60,21 @@ if(NOT TARGET aw::tpl)
     set(AW_TPL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     set(AW_TPL_INSTALL ${TOBUS_INSTALL} CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(aw_tpl)
+endif()
+
+# --- nlohmann/json (optional, only for JsonEventTraits) -----------------------------------------------
+if(TOBUS_ENABLE_JSON)
+    if(NOT TARGET nlohmann_json::nlohmann_json)
+        FetchContent_Declare(
+            nlohmann_json
+            GIT_REPOSITORY https://github.com/nlohmann/json.git
+            GIT_TAG        v3.11.3
+        )
+        set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(nlohmann_json)
+    endif()
+    target_compile_definitions(tobus PUBLIC TOBUS_HAS_JSON=1)
+    target_link_libraries(tobus PUBLIC nlohmann_json::nlohmann_json)
 endif()
 
 # --- library ----------------------------------------------------------------------------------------------------
@@ -112,6 +128,8 @@ target_sources(tobus
             include/aw/tobus/event_bus_factory.hpp
             include/aw/tobus/event_handler.hpp
             include/aw/tobus/event_traits.hpp
+            include/aw/tobus/event_traits/binary_event_traits.hpp
+            include/aw/tobus/event_traits/json_event_traits.hpp
             include/aw/tobus/event_type_id.hpp
             include/aw/tobus/subscription.hpp
             include/aw/tobus/tobus.hpp

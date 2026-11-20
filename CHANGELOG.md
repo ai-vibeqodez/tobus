@@ -14,6 +14,11 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+### Added
+
+- `BinaryEventTraits<T>` — pre-built trait: `std::memcpy` for trivially-copyable types (≤ 255 bytes), or custom `to_binary()` / `from_binary()` for complex types.
+- `JsonEventTraits<T>` — pre-built trait serialising to/from JSON via `nlohmann::json` (requires `TOBUS_ENABLE_JSON`).
+
 ## [0.4.0] - 2026-11-20
 
 ### Added
