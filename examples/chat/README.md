@@ -1,42 +1,42 @@
-# 🧩 Пример: чат из независимых модулей
+# 🧩 Example: chat built from independent modules
 
-Полный код — [`src/main.cpp`](src/main.cpp), собирается как `tobus_example_chat`.
+Full source: [`src/main.cpp`](src/main.cpp), built as `tobus_example_chat`.
 
-В этом примере используется транспорт **in_process** (события передаются в одном потоке через thread pool). Отдельные примеры для `unix_socket`, `redis`, `kafka` и других транспортов — в будущих директориях `02_websocket`, `03_unix_socket` и т. д.
+This example uses the **in_process** transport (events are passed on a single thread through a thread pool). Separate examples for `unix_socket`, `redis`, `kafka`, and other transports will be added in future directories such as `02_websocket`, `03_unix_socket`, and so on.
 
-## Сценарий
+## Scenario
 
-В чат заходят два пользователя и пишут сообщения. Каждая часть системы — отдельный класс-модуль, который получает только `IEventBus&` и ничего не знает о соседях:
+Two users join the chat and send messages. Each part of the system is a separate module class that receives only `IEventBus&` and knows nothing about its neighbors:
 
-| Модуль | Публикует | Подписан на | Что делает |
+| Module | Publishes | Subscribes to | What it does |
 |---|---|---|---|
-| `Auth` | `UserJoined` | — | вход пользователя |
-| `Room` | `MessageSent` | `UserJoined`, `MessageApproved` | принимает сообщения от пользователей, а на экран выводит только одобренные |
-| `Moderation` | `MessageApproved` или `MessageBlocked` | `MessageSent` | проверяет текст (с задержкой, как будто это внешний фильтр) и выносит вердикт |
-| `Notifier` | — | `MessageBlocked` | сообщает автору, что его сообщение отклонено |
-| `Stats` | — | все четыре события | считает события, ничего не публикует |
+| `Auth` | `UserJoined` | — | logs a user in |
+| `Room` | `MessageSent` | `UserJoined`, `MessageApproved` | accepts messages from users and displays only approved ones |
+| `Moderation` | `MessageApproved` or `MessageBlocked` | `MessageSent` | checks the text (with a delay, as if using an external filter) and issues a verdict |
+| `Notifier` | — | `MessageBlocked` | tells the author that their message was rejected |
+| `Stats` | — | all four events | counts events without publishing anything |
 
-## Каскад событий
+## Event cascade
 
-Что происходит, когда `room.say("bob", "buy cheap spam now")`:
+What happens when `room.say("bob", "buy cheap spam now")`:
 
 ```
-Room.say()  ──MessageSent──►  Moderation  (ждёт 20 мс, видит «spam»)
+Room.say()  ──MessageSent──►  Moderation  (waits 20 ms, sees «spam»)
                                   │
                                   └──MessageBlocked──►  Notifier  → «@bob: your message was blocked»
                                                     └─►  Stats
-            └────────────────►  Stats                  (Room это сообщение так и не покажет)
+            └────────────────►  Stats                  (Room never displays this message)
 ```
 
-## Пошагово
+## Step by step
 
-1. `Room` публикует «сырое» `MessageSent` и сразу возвращает управление. Он не ждёт проверки и не знает, что она вообще есть.
-2. `Moderation` получает событие и **в ответ публикует новое** (`MessageApproved` либо `MessageBlocked`). Это каскад: обработчик сам может быть издателем.
-3. Для нормального сообщения `Room` получает `MessageApproved` и печатает его. Для спама — `Notifier` предупреждает автора, а в комнате сообщения нет.
-4. `Stats` слушает всё подряд и был добавлен без единой правки в остальных модулях. То же самое можно сделать с логгером, аудитом, метриками.
-5. `main` — единственное место, которое знает про транспорт (`config.transport`). Заменив его, те же модули переедут на другой транспорт.
+1. `Room` publishes a raw `MessageSent` event and immediately returns. It does not wait for moderation or know that moderation exists.
+2. `Moderation` receives the event and **publishes a new one in response** (`MessageApproved` or `MessageBlocked`). This is an event cascade: a handler can also be a publisher.
+3. For a normal message, `Room` receives `MessageApproved` and prints it. For spam, `Notifier` warns the author, and the message does not appear in the room.
+4. `Stats` listens to every event and was added without changing any other module. The same approach works for logging, auditing, and metrics.
+5. `main` is the only place that knows about the transport (`config.transport`). Changing it moves the same modules to a different transport.
 
-## Пример вывода
+## Sample output
 
 ```
 transport: in_process
@@ -49,32 +49,32 @@ transport: in_process
 joined=2 sent=3 approved=2 blocked=1
 ```
 
-Порядок строк от запуска к запуску меняется — это нормально.
+The order of output lines varies between runs; this is expected.
 
-## Структура
+## Structure
 
 ```
 chat/
 ├── CMakeLists.txt
-├── include/chat/          — заголовки (типы событий + интерфейсы модулей)
+├── include/chat/          — headers (event types + module interfaces)
 │   ├── events.hpp
 │   ├── auth.hpp
 │   ├── room.hpp
 │   ├── moderation.hpp
 │   ├── notifier.hpp
 │   └── stats.hpp
-└── src/                   — реализации
-    ├── main.cpp           — composition root, транспорт
+└── src/                   — implementations
+    ├── main.cpp           — composition root, transport
     ├── room.cpp
     ├── moderation.cpp
     ├── notifier.cpp
     └── stats.cpp
 ```
 
-## На что обратить внимание
+## What to note
 
-- **Всё асинхронно.** `publish` ничего не ждёт; обработчики идут параллельно на пуле потоков. Порядок вывода не гарантирован, вывод защищён мьютексом, счётчики в `Stats` — `atomic`.
-- **`co_await` приостанавливает только свой обработчик.** Пока `Moderation` «думает» 20 мс, остальные события и обработчики не простаивают.
-- **`drain()` ждёт и каскады.** Он завершается, когда закончились не только начатые доставки, но и те, что породили обработчики (вердикты модерации).
-- **Подписка = жизнь объекта `Subscription`.** Поля `Subscription` в модулях отписывают обработчики автоматически вместе с модулем.
-- **Ошибки не доходят до издателя.** Исключение из любого обработчика попадает в `config.on_error`.
+- **Everything is asynchronous.** `publish` does not wait; handlers run in parallel on a thread pool. Output order is not guaranteed, output is protected by a mutex, and `Stats` counters are `atomic`.
+- **`co_await` suspends only its own handler.** While `Moderation` "thinks" for 20 ms, other events and handlers continue without waiting.
+- **`drain()` waits for cascades too.** It completes only after both started deliveries and deliveries created by handlers (moderation verdicts) have finished.
+- **A subscription lasts as long as its `Subscription` object.** Module `Subscription` fields automatically unsubscribe handlers when the module is destroyed.
+- **Errors do not reach the publisher.** Exceptions from any handler are passed to `config.on_error`.
