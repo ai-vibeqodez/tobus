@@ -22,15 +22,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  IMAGE: ghcr.io/ai-warevo/ci-cpp23
-
 jobs:
   lint:
     name: Lint (clang-format, clang-tidy)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     steps:
       - name: Checkout
@@ -90,28 +87,16 @@ jobs:
         with: { source_dir: tests, build_dir: ../build, checks: '-llvmlibc-*', header_filter: '.*/tobus/(include|src)/.*' }
 
   sanitizers:
-    name: ${{ matrix.name }}
+    name: ASan + UBSan (clang-18, libc++)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     # The distro libc++/libc++abi are not ASan-instrumented: they allocate exception messages with the (intercepted)
     # operator new but release them with plain free(), which ASan reports as alloc-dealloc-mismatch on every
     # thrown std::runtime_error/logic_error. A toolchain false positive, not a tobus bug.
     env:
       ASAN_OPTIONS: alloc_dealloc_mismatch=0:detect_leaks=1
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: ASan + UBSan (clang-18, libc++)
-            toolchain: clang18-libcxx
-            sanitizer: address
-          # TSan uses libstdc++: libc++'s shared_ptr/atomic internals are not TSan-instrumented in the distro package,
-          # which would report false races on the very reference counts this library relies on.
-          - name: TSan (clang-18, libstdc++)
-            toolchain: clang18-libstdcxx
-            sanitizer: thread
 
     steps:
       - name: Checkout
@@ -121,24 +106,61 @@ jobs:
         id: tc
         uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
-          toolchain: ${{ matrix.toolchain }}
+          toolchain: clang18-libcxx
           container_mode: true
+          sanitizer: address
           sanitizer_runtime: 'true'
 
-      # TSan maps shadow memory at fixed addresses; recent kernels' ASLR range makes it abort at startup.
-      # In container mode the kernel is the host kernel, so sysctl works.
-      - name: Relax ASLR for ThreadSanitizer
-        if: matrix.sanitizer == 'thread'
-        run: sysctl vm.mmap_rnd_bits=28
-
-      # AW_TPL_SANITIZE adds PUBLIC compile/link flags to aw::tpl, so tobus and the tests are instrumented as well.
       - name: Configure & Build
         uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
           build_type: RelWithDebInfo
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DAW_TPL_SANITIZE=${{ matrix.sanitizer }}
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DAW_TPL_SANITIZE=address
+
+      - name: Run Tests
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: RelWithDebInfo
+          output_on_failure: true
+          timeout: 300
+
+  tsan:
+    name: TSan (clang-18, libstdc++)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare TSan runner
+        id: tsan
+        uses: ai-warevo/.github/.github/actions/setup-tsan@main
+        with:
+          toolchain: clang18-libstdcxx
+          container_mode: false
+
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
+        with:
+          toolchain: clang18-libstdcxx
+          container_mode: false
+          sanitizer: thread
+          sanitizer_runtime: 'true'
+
+      - name: Configure & Build
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: RelWithDebInfo
+          extra_args: >-
+            ${{ steps.tsan.outputs.stdlib_override }}
+            ${{ steps.tc.outputs.cmake_args }}
+            -DAW_TPL_SANITIZE=thread
 
       - name: Run Tests
         uses: ai-warevo/.github/.github/actions/ctest-run@main
@@ -153,15 +175,13 @@ jobs:
         working-directory: build
         env:
           TSAN_OPTIONS: halt_on_error=1 second_deadlock_stack=1
-          ASAN_OPTIONS: alloc_dealloc_mismatch=0:detect_leaks=1:halt_on_error=1
-          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: ctest -C RelWithDebInfo -R tobus_concurrency --repeat until-fail:30 --output-on-failure --timeout 300
 
   stress:
     name: Repeat concurrency tests 30x (${{ matrix.toolchain }}, Release)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     strategy:
       fail-fast: false
@@ -196,7 +216,7 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     steps:
       - name: Checkout

@@ -52,7 +52,7 @@ std::vector<std::byte> serialize_field(Int value) noexcept {
 inline std::vector<std::byte> serialize_field(float v) noexcept {
     std::array<std::byte, 4> buf{};
     std::memcpy(buf.data(), &v, 4);
-    for (int i = 0; i < 2; ++i)
+    for (std::size_t i = 0; i < 2; ++i)
         std::swap(buf[i], buf[3 - i]);
     return {buf.begin(), buf.end()};
 }
@@ -60,7 +60,7 @@ inline std::vector<std::byte> serialize_field(float v) noexcept {
 inline std::vector<std::byte> serialize_field(double v) noexcept {
     std::array<std::byte, 8> buf{};
     std::memcpy(buf.data(), &v, 8);
-    for (int i = 0; i < 4; ++i)
+    for (std::size_t i = 0; i < 4; ++i)
         std::swap(buf[i], buf[7 - i]);
     return {buf.begin(), buf.end()};
 }
@@ -91,7 +91,7 @@ Int deserialize_field(std::span<const std::byte>& span) {
     if (span.size() < N) throw std::runtime_error("binary_event_traits: insufficient data for integral");
     U v = 0;
     for (std::size_t i = 0; i < N; ++i)
-        v = (v << 8) | static_cast<unsigned>(span[i]);
+        v = static_cast<U>((v << 8) | static_cast<U>(span[i]));
     span = span.subspan(N);
     return static_cast<Int>(v);
 }
@@ -99,7 +99,7 @@ Int deserialize_field(std::span<const std::byte>& span) {
 inline float deserialize_field_float(std::span<const std::byte>& span) {
     if (span.size() < 4) throw std::runtime_error("binary_event_traits: insufficient data for float");
     std::array<std::byte, 4> buf{};
-    for (int i = 0; i < 4; ++i)
+    for (std::size_t i = 0; i < 4; ++i)
         buf[3 - i] = span[i];
     span = span.subspan(4);
     float v;
@@ -110,7 +110,7 @@ inline float deserialize_field_float(std::span<const std::byte>& span) {
 inline double deserialize_field_double(std::span<const std::byte>& span) {
     if (span.size() < 8) throw std::runtime_error("binary_event_traits: insufficient data for double");
     std::array<std::byte, 8> buf{};
-    for (int i = 0; i < 8; ++i)
+    for (std::size_t i = 0; i < 8; ++i)
         buf[7 - i] = span[i];
     span = span.subspan(8);
     double v;
@@ -153,8 +153,7 @@ struct BinaryEventTraits {
 
         if constexpr (has_custom) {
             auto payload = EventTraits<T>::to_binary(event);
-            if (payload.size() > MaxSize)
-                throw std::runtime_error("BinaryEventTraits: payload exceeds 255 bytes");
+            if (payload.size() > MaxSize) throw std::runtime_error("BinaryEventTraits: payload exceeds 255 bytes");
             std::vector<std::byte> buf;
             buf.reserve(1 + payload.size());
             buf.push_back(std::byte(payload.size()));
@@ -177,8 +176,7 @@ struct BinaryEventTraits {
             throw std::runtime_error("BinaryEventTraits: zero-length payload");
 
         std::size_t payload_size = static_cast<std::size_t>(bytes[0]);
-        if (payload_size + 1 > bytes.size())
-            throw std::runtime_error("BinaryEventTraits: payload size exceeds buffer");
+        if (payload_size + 1 > bytes.size()) throw std::runtime_error("BinaryEventTraits: payload size exceeds buffer");
 
         std::span<const std::byte> payload = bytes.subspan(1, payload_size);
 

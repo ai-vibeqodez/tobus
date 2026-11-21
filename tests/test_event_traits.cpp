@@ -39,20 +39,17 @@ struct MixedFields {
 } // namespace
 
 template <>
-struct aw::tobus::EventTraits<Point2D>
-    : aw::tobus::BinaryEventTraits<Point2D> {
+struct aw::tobus::EventTraits<Point2D> : aw::tobus::BinaryEventTraits<Point2D> {
     static constexpr std::string_view name = "test.Point2D";
 };
 
 template <>
-struct aw::tobus::EventTraits<TemperatureReading>
-    : aw::tobus::BinaryEventTraits<TemperatureReading> {
+struct aw::tobus::EventTraits<TemperatureReading> : aw::tobus::BinaryEventTraits<TemperatureReading> {
     static constexpr std::string_view name = "test.TemperatureReading";
 };
 
 template <>
-struct aw::tobus::EventTraits<MixedFields>
-    : aw::tobus::BinaryEventTraits<MixedFields> {
+struct aw::tobus::EventTraits<MixedFields> : aw::tobus::BinaryEventTraits<MixedFields> {
     static constexpr std::string_view name = "test.MixedFields";
 };
 
@@ -125,8 +122,7 @@ struct MessageEvent {
 } // namespace
 
 template <>
-struct aw::tobus::EventTraits<MessageEvent>
-    : aw::tobus::BinaryEventTraits<MessageEvent> {
+struct aw::tobus::EventTraits<MessageEvent> : aw::tobus::BinaryEventTraits<MessageEvent> {
     static constexpr std::string_view name = "test.MessageEvent";
 
     static std::vector<std::byte> to_binary(const MessageEvent& e) {
@@ -147,8 +143,7 @@ struct aw::tobus::EventTraits<MessageEvent>
     }
 };
 
-TEST_CASE("BinaryEventTraits roundtrips a type with custom to_binary/from_binary",
-          "[event_traits][binary]") {
+TEST_CASE("BinaryEventTraits roundtrips a type with custom to_binary/from_binary", "[event_traits][binary]") {
     MessageEvent original{99, "hello", 3.14};
     auto bytes = EventTraits<MessageEvent>::serialize(original);
 
@@ -160,8 +155,7 @@ TEST_CASE("BinaryEventTraits roundtrips a type with custom to_binary/from_binary
     REQUIRE(restored.score == Catch::Approx(3.14));
 }
 
-TEST_CASE("BinaryEventTraits custom to_binary handles empty string",
-          "[event_traits][binary]") {
+TEST_CASE("BinaryEventTraits custom to_binary handles empty string", "[event_traits][binary]") {
     MessageEvent original{1, "", 0.0};
     auto bytes = EventTraits<MessageEvent>::serialize(original);
     auto restored = EventTraits<MessageEvent>::deserialize(bytes);
@@ -170,8 +164,7 @@ TEST_CASE("BinaryEventTraits custom to_binary handles empty string",
     REQUIRE(restored.score == Catch::Approx(0.0));
 }
 
-TEST_CASE("BinaryEventTraits custom to_binary handles long string",
-          "[event_traits][binary]") {
+TEST_CASE("BinaryEventTraits custom to_binary handles long string", "[event_traits][binary]") {
     std::string long_name(200, 'x');
     MessageEvent original{42, long_name, 1.0};
     auto bytes = EventTraits<MessageEvent>::serialize(original);
@@ -181,8 +174,7 @@ TEST_CASE("BinaryEventTraits custom to_binary handles long string",
     REQUIRE(restored.score == Catch::Approx(1.0));
 }
 
-TEST_CASE("BinaryEventTraits custom to_binary rejects payload exceeding 255 bytes",
-          "[event_traits][binary]") {
+TEST_CASE("BinaryEventTraits custom to_binary rejects payload exceeding 255 bytes", "[event_traits][binary]") {
     std::string huge(300, 'x');
     MessageEvent original{1, huge, 0.0};
     REQUIRE_THROWS_AS(EventTraits<MessageEvent>::serialize(original), std::runtime_error);
@@ -208,15 +200,13 @@ TEST_CASE("serialize_field serializes single byte", "[event_traits][binary]") {
 
     auto bytes = serialize_field(std::byte(0xAB));
     REQUIRE(bytes.size() == 1);
-    REQUIRE(bytes[0] == std::byte(0xAB));
+    REQUIRE(static_cast<unsigned>(bytes[0]) == 0xAB);
 }
 
 TEST_CASE("deserialize_field roundtrips integral values", "[event_traits][binary]") {
     using namespace aw::tobus::detail;
 
-    std::vector<std::byte> buf = {
-        std::byte(0x00), std::byte(0x00), std::byte(0x12), std::byte(0x34)
-    };
+    std::vector<std::byte> buf = {std::byte(0x00), std::byte(0x00), std::byte(0x12), std::byte(0x34)};
     std::span<const std::byte> span(buf);
     auto val = deserialize_field<std::uint32_t>(span);
     REQUIRE(val == 0x1234);
@@ -267,9 +257,7 @@ TEST_CASE("deserialize_string throws on insufficient data", "[event_traits][bina
     using namespace aw::tobus::detail;
 
     // 2-byte length = 100, but only 1 byte follows
-    std::vector<std::byte> buf = {
-        std::byte(0x00), std::byte(0x64), std::byte('x')
-    };
+    std::vector<std::byte> buf = {std::byte(0x00), std::byte(0x64), std::byte('x')};
     std::span<const std::byte> span(buf);
     REQUIRE_THROWS_AS(deserialize_string(span), std::runtime_error);
 }
@@ -278,8 +266,7 @@ TEST_CASE("deserialize_string throws on insufficient data", "[event_traits][bina
 // Integration with EventBus: publish and receive via in-process bus
 // ============================================================================
 
-TEST_CASE("InProcessBus delivers an event serialized with BinaryEventTraits",
-          "[event_traits][binary][transport]") {
+TEST_CASE("InProcessBus delivers an event serialized with BinaryEventTraits", "[event_traits][binary][transport]") {
     InProcessBus bus;
     std::vector<TemperatureReading> received;
 
@@ -296,8 +283,7 @@ TEST_CASE("InProcessBus delivers an event serialized with BinaryEventTraits",
     REQUIRE(received[0].celsius == 25);
 }
 
-TEST_CASE("InProcessBus delivers a custom to_binary event",
-          "[event_traits][binary][transport]") {
+TEST_CASE("InProcessBus delivers a custom to_binary event", "[event_traits][binary][transport]") {
     InProcessBus bus;
     std::vector<MessageEvent> received;
 
@@ -345,8 +331,7 @@ struct JsonEvent {
 } // namespace
 
 template <>
-struct aw::tobus::EventTraits<JsonEvent>
-    : aw::tobus::JsonEventTraits<JsonEvent> {
+struct aw::tobus::EventTraits<JsonEvent> : aw::tobus::JsonEventTraits<JsonEvent> {
     static constexpr std::string_view name = "test.JsonEvent";
 };
 
@@ -359,8 +344,7 @@ TEST_CASE("JsonEventTraits roundtrips a type with to_json/from_json", "[event_tr
     json_str.reserve(bytes.size());
     for (auto b : bytes)
         json_str.push_back(static_cast<char>(b));
-    REQUIRE(json_str.find("\"value\":42") != std::string::npos ||
-            json_str.find("\"value\" : 42") != std::string::npos);
+    REQUIRE(json_str.find("\"value\":42") != std::string::npos || json_str.find("\"value\" : 42") != std::string::npos);
 
     auto restored = EventTraits<JsonEvent>::deserialize(bytes);
     REQUIRE(restored.value == 42);

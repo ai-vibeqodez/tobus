@@ -63,5 +63,12 @@ function(aw_test_target)
     add_executable(${_TEST_NAME}_tests ${_TEST_SOURCES})
     target_link_libraries(${_TEST_NAME}_tests PRIVATE ${_TEST_LINK_TARGET} Catch2::Catch2WithMain)
     target_compile_options(${_TEST_NAME}_tests PRIVATE ${AW_WARNINGS})
+    # On MSVC, disable Catch2 C++17 StringMaker specializations for std::string_view and std::byte
+    # to avoid LNK2019 unresolved external symbols with Catch2 v3.7.1
+    if(MSVC)
+        target_compile_definitions(${_TEST_NAME}_tests PRIVATE
+            CATCH_CONFIG_NO_CPP17_STRING_VIEW
+            CATCH_CONFIG_NO_CPP17_BYTE)
+    endif()
     catch_discover_tests(${_TEST_NAME}_tests)
 endfunction()

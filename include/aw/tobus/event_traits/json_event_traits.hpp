@@ -76,8 +76,7 @@ struct JsonEventTraits {
             event.from_json(j);
             return event;
         } else {
-            static_assert(sizeof(T) == 0,
-                          "JsonEventTraits: T must provide to_json() and from_json()");
+            static_assert(sizeof(T) == 0, "JsonEventTraits: T must provide to_json() and from_json()");
         }
     }
 };

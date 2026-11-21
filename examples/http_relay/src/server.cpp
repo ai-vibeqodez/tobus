@@ -13,5 +13,6 @@ int main(int argc, char** argv) {
 
     auto bus = aw::tobus::EventBusFactory::create(config);
     std::cout << "HTTP relay listening on " << config.endpoint << "; press Ctrl-C to stop\n" << std::flush;
-    for (;;) std::this_thread::sleep_for(std::chrono::hours(1));
+    for (;;)
+        std::this_thread::sleep_for(std::chrono::hours(1));
 }
