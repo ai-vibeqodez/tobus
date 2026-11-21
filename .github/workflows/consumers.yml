@@ -1,8 +1,8 @@
-# Consumers: does tobus work for a downstream project? Three ways of depending on it, each a tiny project in
-# ci/consumers/ that publishes and receives one event.
+# Consumers: does tobus work for a downstream project? Three consumption patterns are tested, each
+# a minimal test project in ci/consumers/ that creates an event bus and verifies basic functionality.
 #   add_subdirectory  tobus as a subdirectory/submodule of the parent project
 #   find_package      tobus installed to a prefix (aw_tpl comes with it)
-#   fetch_content     FetchContent_MakeAvailable straight from GitHub, pinned to the commit under test (how smlq_sfw uses it)
+#   fetch_content     FetchContent_MakeAvailable straight from GitHub, pinned to the commit under test
 #
 # fetch_content clones from the network, so it only means something once the commit is pushed; it is pinned to the
 # exact commit being tested (PR head / pushed sha) rather than `main`, so a PR tests itself.
