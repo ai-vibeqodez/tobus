@@ -60,11 +60,23 @@ function(aw_test_target)
         if(NOT catch2_POPULATED)
             FetchContent_Populate(Catch2)
             
+            message(STATUS "Catch2 source dir: ${catch2_SOURCE_DIR}")
+            message(STATUS "Platform: MSVC=${MSVC}, CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
+            
             # On MSVC, patch Catch2's CMakeLists.txt to disable problematic StringMaker specializations
-            if(MSVC)
+            if(MSVC OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+                message(STATUS "Patching Catch2 for MSVC StringMaker issues...")
                 file(READ "${catch2_SOURCE_DIR}/CMakeLists.txt" _catch2_cmake)
+                
+                # Check if the strings exist
+                if(_catch2_cmake MATCHES "option\\(CATCH_CONFIG_NO_CPP17_STRING_VIEW")
+                    message(STATUS "Found CATCH_CONFIG_NO_CPP17_STRING_VIEW option, patching...")
+                else()
+                    message(STATUS "CATCH_CONFIG_NO_CPP17_STRING_VIEW not found in expected format")
+                endif()
+                
                 string(REPLACE 
-                    "option(CATCH_CONFIG_NO_CPP17_STRING_VIEW" 
+                    "option(CATCH_CONFIG_NO_CPP17_STRING_VIEW"
                     "set(CATCH_CONFIG_NO_CPP17_STRING_VIEW ON CACHE BOOL"
                     _catch2_cmake "${_catch2_cmake}")
                 string(REPLACE
@@ -72,6 +84,7 @@ function(aw_test_target)
                     "set(CATCH_CONFIG_NO_CPP17_BYTE ON CACHE BOOL"
                     _catch2_cmake "${_catch2_cmake}")
                 file(WRITE "${catch2_SOURCE_DIR}/CMakeLists.txt" "${_catch2_cmake}")
+                message(STATUS "Catch2 CMakeLists.txt patched")
             endif()
             
             add_subdirectory(${catch2_SOURCE_DIR} ${catch2_BINARY_DIR})
