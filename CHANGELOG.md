@@ -27,6 +27,10 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 - Fix CI-only transport option and example executable paths; make HTTP hex encoding warning-clean under Clang `-Werror`.
 - Run TSan on a native runner with the catalog setup action instead of attempting to change host ASLR from a container.
 
+### Fixed
+
+- Sign conversion warnings in `BinaryEventTraits` serialize/deserialize helpers under `-Wsign-conversion` and `-Wimplicit-int-conversion`.
+
 ## [0.4.0] - 2026-11-20
 
 ### Added
