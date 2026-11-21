@@ -93,27 +93,30 @@ jobs:
       - name: Setup MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
 
-      # Windows job: MSVC with stub transports (unreachable code warnings).
-      # The shared actions (setup-toolchain, cmake-build, ctest-run) are designed
-      # for Linux containers and don't work on windows-latest: Ninja is not
-      # installed, and shell: bash steps don't inherit the MSVC environment
-      # correctly. Use inline cmake/ctest commands with the pre-installed Visual
-      # Studio generator.
+      # Windows job: MSVC with stub transports (unreachable code warnings)
       - name: Configure & Build
-        run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
-            -DTOBUS_ENABLE_UNIX_SOCKET=OFF `
-            -DTOBUS_ENABLE_TCP_SERVER=OFF `
-            -DTOBUS_ENABLE_HTTP=OFF `
-            -DTOBUS_ENABLE_WEBSOCKET=OFF `
-            -DTOBUS_ENABLE_REDIS=ON `
-            -DTOBUS_ENABLE_ZEROMQ=ON `
-            -DTOBUS_ENABLE_RABBITMQ=ON `
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: ${{ matrix.build_type }}
+          extra_args: >-
+            -DTOBUS_ENABLE_UNIX_SOCKET=OFF
+            -DTOBUS_ENABLE_TCP_SERVER=OFF
+            -DTOBUS_ENABLE_HTTP=OFF
+            -DTOBUS_ENABLE_WEBSOCKET=OFF
+            -DTOBUS_ENABLE_REDIS=ON
+            -DTOBUS_ENABLE_ZEROMQ=ON
+            -DTOBUS_ENABLE_RABBITMQ=ON
             -DTOBUS_ENABLE_KAFKA=ON
-          cmake --build build --parallel --config ${{ matrix.build_type }}
 
       - name: Run Tests
-        run: ctest --test-dir build --config ${{ matrix.build_type }} --output-on-failure
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: ${{ matrix.build_type }}
+          output_on_failure: true
 
       - name: Run example (Windows)
         shell: pwsh
@@ -182,11 +185,17 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       # Windows job: default options (stub transports with unreachable code warnings).
-      # Use inline cmake/ctest commands as shared actions don't work on windows-latest.
       - name: Configure & Build
-        run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --parallel --config Release
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: Release
 
       - name: Run Tests
-        run: ctest --test-dir build --config Release --output-on-failure
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: Release
+          output_on_failure: true

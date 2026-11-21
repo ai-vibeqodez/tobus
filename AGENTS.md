@@ -33,7 +33,7 @@ GitHub Actions owns all CI and releases, reusing `ai-warevo/.github` composite a
 ### Workflows
 
 - **pr-fast.yml** (5-10 min): calls `reusable-pr-fast.yml` with fast checks — clang-format, clang-tidy, and Debug build+test for clang18-libcxx and gcc15.
-- **ci.yml** (20-25 min): full matrix builds (Linux clang18-libcxx/gcc15 × Debug/Release, Windows MSVC × Debug/Release) and default-options matrix (no transport stubs enabled). Linux jobs use catalog composite actions (`setup-toolchain`, `cmake-build`, `ctest-run`); Windows jobs use inline CMake commands because shared actions require Ninja, which is unavailable on windows-latest.
+- **ci.yml** (20-25 min): full matrix builds (Linux clang18-libcxx/gcc15 × Debug/Release, Windows MSVC × Debug/Release) and default-options matrix (no transport stubs enabled). All jobs use catalog composite actions (`setup-toolchain`, `cmake-build`, `ctest-run`).
 - **test.yml** (30-40 min): lint (clang-format/tidy on all sources), sanitizers (ASan+UBSan Debug, TSan Release × 30 iterations), stress tests (concurrency × 30), and coverage (gcovr → JSON → parser → badge → GitHub Pages deployment).
 - **consumers.yml** (25-30 min): integration tests for add_subdirectory, find_package, and FetchContent on Linux (clang18-libcxx, gcc15) and Windows MSVC.
 - **release.yml**: calls `reusable-release.yml` for version resolution (from CHANGELOG.md categories), changelog promotion, tag creation, checksum generation/verification, and GitHub Release publication. No build artifacts or Docker images because this is a header+static library project.
@@ -41,8 +41,7 @@ GitHub Actions owns all CI and releases, reusing `ai-warevo/.github` composite a
 ### When adding or changing workflows
 
 - Keep project-specific test and build logic (multi-transport matrix, examples, consumer integration) in repository workflows.
-- Use catalog composite actions (`@main`) for standard CMake build/test/lint steps on Linux containers.
-- Use inline CMake commands for Windows MSVC jobs (shared actions require Ninja).
+- Use catalog composite actions (`@main`) for standard CMake build/test/lint steps on all platforms (Linux, macOS, Windows).
 - Document workflow changes in README.md CI/CD section and add a CHANGELOG.md entry under `## [Unreleased]`.
 
 ## Changelog & releases

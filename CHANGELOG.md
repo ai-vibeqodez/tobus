@@ -21,7 +21,7 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ### Changed
 
-- Integrated reusable workflows and composite actions from `ai-warevo/.github` catalog: CI uses shared `reusable-pr-fast.yml` for fast PR checks and catalog composite actions for Linux builds; Windows MSVC builds use inline CMake commands since shared actions require Ninja which is unavailable on windows-latest.
+- Integrated reusable workflows and composite actions from `ai-warevo/.github` catalog for unified CI/CD: PR checks via `reusable-pr-fast.yml`, release automation via `reusable-release.yml`, and standard CMake workflows via `cmake-build` and `ctest-run` on all platforms (Linux, macOS, Windows MSVC).
 - Release workflow uses shared `reusable-release.yml` for version resolution, changelog promotion, tag creation, checksum generation/verification, and GitHub Release publication.
 - Consumers workflow refactored to test library integration via `add_subdirectory`, `find_package`, and `FetchContent` on Linux clang/gcc and Windows MSVC.
 - Pin bundled `aw::tpl` dependency to v3.1.0 so builds use the supported C++20 API and installed package version.
