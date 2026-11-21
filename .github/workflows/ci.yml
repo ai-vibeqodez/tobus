@@ -109,6 +109,8 @@ jobs:
             -DTOBUS_ENABLE_ZEROMQ=ON
             -DTOBUS_ENABLE_RABBITMQ=ON
             -DTOBUS_ENABLE_KAFKA=ON
+            -DCATCH_CONFIG_NO_CPP17_STRING_VIEW=ON
+            -DCATCH_CONFIG_NO_CPP17_BYTE=ON
 
       - name: Run Tests
         uses: ai-warevo/.github/.github/actions/ctest-run@main
@@ -191,6 +193,9 @@ jobs:
           source_dir: .
           build_dir: build
           build_type: Release
+          extra_args: >-
+            -DCATCH_CONFIG_NO_CPP17_STRING_VIEW=ON
+            -DCATCH_CONFIG_NO_CPP17_BYTE=ON
 
       - name: Run Tests
         uses: ai-warevo/.github/.github/actions/ctest-run@main
