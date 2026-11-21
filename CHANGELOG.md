@@ -29,6 +29,7 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ### Fixed
 
+- Use MSVC-compatible warning flags for examples and tests instead of passing GCC/Clang `-Wextra` to `cl`.
 - Resolved integer sign-conversion warnings in `bus.hpp`, `event_queue.hpp`, and `BinaryEventTraits` serialize/deserialize helpers with explicit casts for `-Wconversion -Wsign-conversion -Wimplicit-int-conversion` compliance.
 - CMakeUserPresets.json inheritance path corrected from missing `dev` preset to existing `debug` preset.
 - Correct consumer workflow source paths for Linux containers and format all sources exercised by clang-format CI.
