@@ -111,14 +111,6 @@ jobs:
             -DTOBUS_ENABLE_KAFKA=ON
             -DTOBUS_BUILD_TESTS=OFF
 
-      - name: Run Tests
-        uses: ai-warevo/.github/.github/actions/ctest-run@main
-        with:
-          source_dir: .
-          build_dir: build
-          config: ${{ matrix.build_type }}
-          output_on_failure: true
-        if: ${{ false }}
 
       - name: Run example (Windows)
         shell: pwsh
@@ -196,11 +188,3 @@ jobs:
           extra_args: >-
             -DTOBUS_BUILD_TESTS=OFF
 
-      - name: Run Tests
-        uses: ai-warevo/.github/.github/actions/ctest-run@main
-        with:
-          source_dir: .
-          build_dir: build
-          config: Release
-          output_on_failure: true
-        if: ${{ false }}
