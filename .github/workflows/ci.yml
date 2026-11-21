@@ -111,6 +111,7 @@ jobs:
             -DTOBUS_ENABLE_RABBITMQ=OFF
             -DTOBUS_ENABLE_KAFKA=OFF
             -DTOBUS_BUILD_TESTS=OFF
+            -DTOBUS_BUILD_EXAMPLES=ON
 
 
       - name: Run example (Windows)
