@@ -53,7 +53,7 @@ if(NOT TARGET aw::tpl)
     FetchContent_Declare(
         aw_tpl
         GIT_REPOSITORY https://github.com/ai-warevo/tpl.git
-        GIT_TAG        main
+        GIT_TAG        v3.1.0
     )
     # tpl is a subproject here: no tests/examples; it must install along with us so that our export set resolves.
     set(AW_TPL_BUILD_TESTS OFF CACHE BOOL "" FORCE)

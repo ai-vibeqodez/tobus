@@ -26,21 +26,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: linux
-            toolchain: clang18-libcxx
-          - os: linux
-            toolchain: gcc15
-          - os: windows
-            toolchain: msvc
+        toolchain: [clang18-libcxx, gcc15]
         build_type: [Debug, Release]
 
-    # Linux → container; Windows → native runner
-    runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'windows-latest' }}
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
-    if: ${{ matrix.os == 'linux' }}
 
     steps:
       - name: Checkout
@@ -148,19 +140,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: linux
-            toolchain: clang18-libcxx
-          - os: linux
-            toolchain: gcc15
-          - os: windows
-            toolchain: msvc
+        toolchain: [clang18-libcxx, gcc15]
 
-    runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'windows-latest' }}
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
-    if: ${{ matrix.os == 'linux' }}
 
     steps:
       - name: Checkout

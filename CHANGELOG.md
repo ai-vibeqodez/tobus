@@ -22,6 +22,8 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 ### Changed
 
 - Integrated the shared `ai-warevo/.github` composite actions and reusable PR/release workflows.
+- Pin the bundled `aw::tpl` dependency to v3.1.0 so builds use the supported C++20 API and installed package version.
+- Correct consumer workflow source paths for Linux containers and format the event-trait headers checked by CI.
 
 ## [0.4.0] - 2026-11-20
 

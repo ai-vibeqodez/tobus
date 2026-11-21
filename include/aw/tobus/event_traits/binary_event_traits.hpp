@@ -153,8 +153,7 @@ struct BinaryEventTraits {
 
         if constexpr (has_custom) {
             auto payload = EventTraits<T>::to_binary(event);
-            if (payload.size() > MaxSize)
-                throw std::runtime_error("BinaryEventTraits: payload exceeds 255 bytes");
+            if (payload.size() > MaxSize) throw std::runtime_error("BinaryEventTraits: payload exceeds 255 bytes");
             std::vector<std::byte> buf;
             buf.reserve(1 + payload.size());
             buf.push_back(std::byte(payload.size()));
@@ -177,8 +176,7 @@ struct BinaryEventTraits {
             throw std::runtime_error("BinaryEventTraits: zero-length payload");
 
         std::size_t payload_size = static_cast<std::size_t>(bytes[0]);
-        if (payload_size + 1 > bytes.size())
-            throw std::runtime_error("BinaryEventTraits: payload size exceeds buffer");
+        if (payload_size + 1 > bytes.size()) throw std::runtime_error("BinaryEventTraits: payload size exceeds buffer");
 
         std::span<const std::byte> payload = bytes.subspan(1, payload_size);
 

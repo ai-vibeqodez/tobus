@@ -59,7 +59,7 @@ jobs:
           source_dir: ci/consumers/add_subdirectory
           build_dir: build
           build_type: Release
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ github.workspace }}
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=.
 
       - name: Run consumer
         uses: ai-warevo/.github/.github/actions/ctest-run@main
@@ -90,7 +90,7 @@ jobs:
           source_dir: ci/consumers/add_subdirectory
           build_dir: build
           build_type: Release
-          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=${{ github.workspace }}
+          extra_args: ${{ steps.tc.outputs.cmake_args }} -DTOBUS_SOURCE_DIR=.
 
       - name: Run consumer
         uses: ai-warevo/.github/.github/actions/ctest-run@main
