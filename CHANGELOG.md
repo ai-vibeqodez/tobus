@@ -14,6 +14,13 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-21
+
+### Changed
+
+- lint
+- ci
+
 ## [0.5.1] - 2026-11-21
 
 ### Changed
