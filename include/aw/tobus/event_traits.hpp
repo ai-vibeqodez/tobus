@@ -61,31 +61,11 @@ concept SerializableEvent = NamedEvent<T> && requires(const T& event, std::span<
     { EventTraits<T>::deserialize(bytes) } -> std::same_as<T>;
 };
 
-namespace detail {
+} // namespace aw::tobus
 
-template <typename T>
-EventTypeInfo make_event_type_info() {
-    EventTypeInfo info;
-    if constexpr (NamedEvent<T>) {
-        info.name = std::string_view{EventTraits<T>::name};
-    } else {
-        // Process-local identity only: such a type can never be serializable.
-        info.name = typeid(T).name();
-    }
-    info.id = EventTypeId::from_name(info.name);
-    info.type = &typeid(T);
-    if constexpr (SerializableEvent<T>) {
-        info.encode = [](const void* event) -> std::vector<std::byte> {
-            return EventTraits<T>::serialize(*static_cast<const T*>(event));
-        };
-        info.decode = [](std::span<const std::byte> bytes) -> std::shared_ptr<const void> {
-            return std::make_shared<const T>(EventTraits<T>::deserialize(bytes));
-        };
-    }
-    return info;
-}
+#include <aw/tobus/detail/event_traits_impl.hpp>
 
-} // namespace detail
+namespace aw::tobus {
 
 /**
  * @brief The descriptor of event type @p T. One instance per type for the whole program.

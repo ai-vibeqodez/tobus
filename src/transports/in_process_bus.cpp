@@ -6,13 +6,20 @@
 
 namespace aw::tobus {
 
+struct InProcessBus::Impl {
+    explicit Impl(ErrorHandler on_error)
+        : dispatcher(detail::Dispatcher::create(std::move(on_error))) {}
+
+    std::shared_ptr<detail::Dispatcher> dispatcher;
+};
+
 InProcessBus::InProcessBus(const EventBusConfig& config)
-    : dispatcher_(detail::Dispatcher::create(config.on_error)) {}
+    : impl_(std::make_unique<Impl>(config.on_error)) {}
 
 InProcessBus::~InProcessBus() = default;
 
 Task<void> InProcessBus::drain() {
-    return detail::Dispatcher::drain(dispatcher_);
+    return detail::Dispatcher::drain(impl_->dispatcher);
 }
 
 std::string_view InProcessBus::transport_name() const noexcept {
@@ -20,11 +27,11 @@ std::string_view InProcessBus::transport_name() const noexcept {
 }
 
 void InProcessBus::publish_raw(const EventTypeInfo& type, std::shared_ptr<const void> event) {
-    dispatcher_->dispatch(type, event);
+    impl_->dispatcher->dispatch(type, event);
 }
 
 Subscription InProcessBus::subscribe_raw(const EventTypeInfo& type, RawEventHandler handler) {
-    return dispatcher_->subscribe(type, std::move(handler));
+    return impl_->dispatcher->subscribe(type, std::move(handler));
 }
 
 } // namespace aw::tobus

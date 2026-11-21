@@ -10,10 +10,6 @@
 
 #include <memory>
 
-namespace aw::tobus::detail {
-class Dispatcher;
-}
-
 namespace aw::tobus {
 
 /**
@@ -38,7 +34,8 @@ protected:
     Subscription subscribe_raw(const EventTypeInfo& type, RawEventHandler handler) override;
 
 private:
-    std::shared_ptr<detail::Dispatcher> dispatcher_;
+    struct Impl;
+    std::unique_ptr<Impl> impl_;
 };
 
 } // namespace aw::tobus

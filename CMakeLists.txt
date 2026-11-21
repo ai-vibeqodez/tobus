@@ -145,6 +145,8 @@ target_sources(tobus
             include/aw/tobus/event_bus_factory.hpp
             include/aw/tobus/event_handler.hpp
             include/aw/tobus/event_traits.hpp
+            include/aw/tobus/detail/binary_event_traits_helpers.hpp
+            include/aw/tobus/detail/event_traits_impl.hpp
             include/aw/tobus/event_traits/binary_event_traits.hpp
             include/aw/tobus/event_traits/json_event_traits.hpp
             include/aw/tobus/event_type_id.hpp
@@ -165,7 +167,7 @@ target_sources(tobus
 
 if(TOBUS_INSTALL)
     include(Library/InstallExport)  # From template-cpp/cmake/Library/
-    aw_install_library(NAME tobus NS aw::tobus DEPENDENCIES "aw_tpl 3.1")
+    aw_install_library(TARGET tobus NAME tobus NS aw::tobus DEPENDENCIES "aw_tpl 3.1")
 endif()
 
 # Tests and examples exist only if the project was generated with them (the directories are optional).

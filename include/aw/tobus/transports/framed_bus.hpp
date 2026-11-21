@@ -19,10 +19,6 @@
 #include <unordered_map>
 #include <vector>
 
-namespace aw::tobus::detail {
-class Dispatcher;
-}
-
 namespace aw::tobus {
 
 /**
@@ -72,9 +68,10 @@ protected:
 private:
     EventBusConfig config_;
     std::uint64_t origin_id_;
-    std::shared_ptr<detail::Dispatcher> dispatcher_;
     mutable std::mutex decoders_mtx_;
     std::unordered_map<EventTypeId, EventTypeInfo> event_types_;
+    struct Impl;
+    std::unique_ptr<Impl> impl_;
 };
 
 } // namespace aw::tobus
