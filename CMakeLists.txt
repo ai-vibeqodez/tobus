@@ -5,26 +5,25 @@ include(FetchContent)
 
 FetchContent_Declare(
     aw_cmake_modules
-    GIT_REPOSITORY https://github.com/ai-warevo/template_cpp.git
-    GIT_TAG        main
-    GIT_SHALLOW    TRUE
-    SOURCE_SUBDIR  non_existent_dir
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../template-cpp
 )
 
 FetchContent_MakeAvailable(aw_cmake_modules)
 
-# Add remote cmake directory to module search path (local cmake/ is checked first)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+# Add remote cmake directory to module search path
 list(APPEND CMAKE_MODULE_PATH "${aw_cmake_modules_SOURCE_DIR}/cmake")
 
-# --- Project configuration (using remote shared modules) ---
-include(ProjectConfig)  # From template-cpp/cmake/
+# --- Project configuration (all from remote) ---
+include(ProjectConfig)
 
 aw_project_config(NAME tobus NS aw::tobus)
 project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
 
 # clang-tidy (CI) reads compile_commands.json. aw_project_config() sets this too, but only in its own function scope.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# --- Additional cmake modules (must come after project()) ---
+include(Compiler)
 
 # Top-level builds get tests and examples by default; consumers (FetchContent / add_subdirectory) do not.
 if(PROJECT_IS_TOP_LEVEL)
@@ -37,6 +36,9 @@ option(TOBUS_BUILD_TESTS "Build tobus unit tests" ${TOBUS_IS_TOP_LEVEL})
 option(TOBUS_BUILD_EXAMPLES "Build tobus examples" ${TOBUS_IS_TOP_LEVEL})
 option(TOBUS_INSTALL "Generate install rules and package config for aw::tobus" ${TOBUS_IS_TOP_LEVEL})
 option(TOBUS_WARNINGS_AS_ERRORS "Build tobus with strict warnings treated as errors" OFF)
+option(AW_ENABLE_COVERAGE "Enable code coverage instrumentation" OFF)
+set(AW_SANITIZE "none" CACHE STRING "Sanitizer to enable: none, address (ASan+UBSan) or thread (TSan)")
+set_property(CACHE AW_SANITIZE PROPERTY STRINGS none address thread)
 
 # Transports. InProcessBus is always built; the others are stubs for now and OFF by default.
 option(TOBUS_ENABLE_UNIX_SOCKET "Build the UnixSocketBus stub" OFF)
@@ -49,17 +51,14 @@ option(TOBUS_ENABLE_RABBITMQ "Enable the RabbitMQBus stub (header-only)" OFF)
 option(TOBUS_ENABLE_KAFKA "Enable the KafkaBus stub (header-only)" OFF)
 option(TOBUS_ENABLE_JSON "Build with nlohmann/json support for JsonEventTraits" OFF)
 
-# Compiler warnings (must come after project() so CMAKE_CXX_COMPILER_ID is known).
-# AW_WARNINGS is shared with the tests; AW_STRICT_WARNINGS (opt-in -Werror) only applies to the library and examples.
-if(MSVC)
-    set(AW_WARNINGS /W4)
-    set(AW_STRICT_WARNINGS /WX)
-else()
-    set(AW_WARNINGS -Wall -Wextra -Wpedantic)
-    set(AW_STRICT_WARNINGS -Wshadow -Wconversion -Werror)
-endif()
-if(NOT TOBUS_WARNINGS_AS_ERRORS)
-    set(AW_STRICT_WARNINGS "")
+# --- Sanitizer/coverage validation ---
+if(NOT AW_SANITIZE STREQUAL "none")
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        message(FATAL_ERROR "AW_SANITIZE requires GCC or Clang")
+    endif()
+    if(AW_ENABLE_COVERAGE)
+        message(FATAL_ERROR "AW_SANITIZE cannot be combined with AW_ENABLE_COVERAGE")
+    endif()
 endif()
 
 # --- aw::tpl (coroutines) ---------------------------------------------------------------------------------------
@@ -108,7 +107,14 @@ add_library(aw::tobus ALIAS tobus)
 target_compile_features(tobus PUBLIC cxx_std_23)
 # src/ is the library's private include root (detail/dispatcher.hpp); it is not part of the installed or exported interface.
 target_include_directories(tobus PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_compile_options(tobus PRIVATE ${AW_WARNINGS} ${AW_STRICT_WARNINGS})
+
+# Apply compiler-specific configuration
+if(TOBUS_WARNINGS_AS_ERRORS)
+    aw_configure_compiler(TARGET tobus STRICT_WARNINGS)
+else()
+    aw_configure_compiler(TARGET tobus)
+endif()
+
 target_link_libraries(tobus PUBLIC aw::tpl)
 
 # Each transport: TOBUS_HAS_<X> is 0/1 for every consumer; the socket-based ones also compile their stub source.
