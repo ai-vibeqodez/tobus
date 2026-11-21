@@ -33,6 +33,7 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 - CMakeUserPresets.json inheritance path corrected from missing `dev` preset to existing `debug` preset.
 - Correct consumer workflow source paths for Linux containers and format all sources exercised by clang-format CI.
 - Fix CI-only transport option and example executable paths; make HTTP hex encoding warning-clean under Clang `-Werror`.
+- Catch2 v3 on Windows MSVC: disable C++17 std::string_view and std::byte StringMaker specializations (`CATCH_CONFIG_NO_CPP17_STRING_VIEW`, `CATCH_CONFIG_NO_CPP17_BYTE`) to avoid unresolved external symbol linker errors in v3.7.1.
 
 ## [0.4.0] - 2026-11-20
 

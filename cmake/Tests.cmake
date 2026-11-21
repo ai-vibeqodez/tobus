@@ -49,6 +49,12 @@ function(aw_test_target)
     include(FetchContent)
     find_package(Catch2 3 QUIET)
     if(NOT Catch2_FOUND)
+        # On MSVC, disable C++17 std::string_view and std::byte StringMaker specializations
+        # to avoid unresolved external symbol linker errors with Catch2 v3.7.1
+        if(MSVC)
+            set(CATCH_CONFIG_NO_CPP17_STRING_VIEW ON CACHE BOOL "" FORCE)
+            set(CATCH_CONFIG_NO_CPP17_BYTE ON CACHE BOOL "" FORCE)
+        endif()
         FetchContent_Declare(Catch2
             GIT_REPOSITORY https://github.com/catchorg/Catch2.git
             GIT_TAG        v3.7.1
