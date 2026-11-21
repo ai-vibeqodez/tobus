@@ -117,17 +117,16 @@ jobs:
       - name: Run example (Windows)
         shell: pwsh
         run: |
-          $config = "${{ matrix.build_type }}"
-          $exe = "./build/$config/examples/chat/tobus_example_chat.exe"
-          Write-Host "=== Looking for executable at: $exe"
-          if (Test-Path $exe) {
-            Write-Host "=== Running tobus_example_chat ($config)"
-            & $exe
+          Write-Host "Looking for tobus_example_chat.exe..."
+          $found = Get-ChildItem -Path ./build -Recurse -File -Filter "tobus_example_chat.exe" -ErrorAction SilentlyContinue
+          if ($found.Count -gt 0) {
+            Write-Host "Found executable at: $($found[0].FullName)"
+            & $found[0].FullName
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           } else {
-            Write-Host "ERROR: Executable not found at $exe"
-            Write-Host "Contents of ./build:"
-            Get-ChildItem -Path ./build -Recurse -File -Filter "*.exe" | ForEach-Object { Write-Host $_.FullName }
+            Write-Host "ERROR: tobus_example_chat.exe not found in build directory"
+            Write-Host "All .exe files in ./build:"
+            Get-ChildItem -Path ./build -Recurse -File -Filter "*.exe" | ForEach-Object { Write-Host "  $($_.FullName)" }
             exit 1
           }
 
