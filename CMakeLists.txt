@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.23)
 
+# Workaround for Catch2 v3.7.1 MSVC linker errors (LNK2019: unresolved StringMaker specializations).
+# Must be set BEFORE project() so FetchContent sees them when processing Catch2.
+if(MSVC)
+  set(CATCH_CONFIG_NO_CPP17_STRING_VIEW ON CACHE BOOL "Disable Catch2 string_view support on MSVC" FORCE)
+  set(CATCH_CONFIG_NO_CPP17_BYTE ON CACHE BOOL "Disable Catch2 byte support on MSVC" FORCE)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 include(cmake/ProjectConfig)
