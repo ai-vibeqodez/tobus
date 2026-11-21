@@ -100,6 +100,7 @@ jobs:
           source_dir: .
           build_dir: build
           build_type: ${{ matrix.build_type }}
+          config: ${{ matrix.build_type }}
           extra_args: >-
             -DTOBUS_ENABLE_UNIX_SOCKET=OFF
             -DTOBUS_ENABLE_TCP_SERVER=OFF
@@ -115,8 +116,9 @@ jobs:
       - name: Run example (Windows)
         shell: pwsh
         run: |
-          $exe = "./build/examples/chat/tobus_example_chat.exe"
-          Write-Host "=== tobus_example_chat"
+          $config = "${{ matrix.build_type }}"
+          $exe = "./build/$config/examples/chat/tobus_example_chat.exe"
+          Write-Host "=== tobus_example_chat ($config)"
           & $exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
