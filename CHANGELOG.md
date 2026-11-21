@@ -14,26 +14,65 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-21
+
 ### Added
 
-- `BinaryEventTraits<T>` — pre-built trait: `std::memcpy` for trivially-copyable types (≤ 255 bytes), or custom `to_binary()` / `from_binary()` for complex types.
-- `JsonEventTraits<T>` — pre-built trait serialising to/from JSON via `nlohmann::json` (requires `TOBUS_ENABLE_JSON`).
+- add curl testing guide and event traits
 
 ### Changed
 
-- Integrated reusable workflows and composite actions from `ai-warevo/.github` catalog for unified CI/CD: PR checks via `reusable-pr-fast.yml`, release automation via `reusable-release.yml`, and standard CMake workflows via `cmake-build` and `ctest-run` on all platforms (Linux, macOS, Windows MSVC).
-- Release workflow uses shared `reusable-release.yml` for version resolution, changelog promotion, tag creation, checksum generation/verification, and GitHub Release publication.
-- Consumers workflow refactored to test library integration via `add_subdirectory`, `find_package`, and `FetchContent` on Linux clang/gcc and Windows MSVC.
-- Pin bundled `aw::tpl` dependency to v3.1.0 so builds use the supported C++20 API and installed package version.
-- Run TSan on a native runner with the catalog setup action instead of attempting to change host ASLR from a container.
+- remove consumers.yml workflow
+- remove redundant consumer integration tests
+- restore consumer integration tests after cmake restructure
+- fix cmake
+- remove local cmake/ and scripts/, unify with tpl structure
+- ci
+- ci
+- Merge branch 'main' of github.com:ai-warevo/tobus
+- Merge remote-tracking branch 'origin/main' into fix/validate-project-workflows
+- Merge pull request #2 from ai-vibeqodez/fix/validate-project-workflows
+- improve Windows example discovery with recursive find
+- explicitly enable examples on Windows MSVC jobs
+- add diagnostics for Windows example build path
+- fix Windows MSVC multi-config build paths
+- disable broker transports on Windows MSVC
+- remove test steps from Windows MSVC jobs entirely
+- use correct YAML if condition for Windows test steps
+- skip test run step on Windows MSVC
+- update CHANGELOG for Windows test disabling
+- disable test building on Windows MSVC to avoid Catch2 linker issues
+- update CHANGELOG to mention test code fix for Catch2 MSVC
+- add diagnostic output for Catch2 cache settings
+- pass Catch2 config options as CMake arguments for Windows MSVC jobs
+- use shared actions for Windows MSVC jobs
+- add CI/CD section to AGENTS.md
+- Merge pull request #1 from ai-vibeqodez/feat/integrate-reusable-ci
+- integrate shared reusable workflows
+- c++23
+- http_relay output
+- ru -> en
 
 ### Fixed
 
-- Resolved integer sign-conversion warnings in `bus.hpp`, `event_queue.hpp`, and `BinaryEventTraits` serialize/deserialize helpers with explicit casts for `-Wconversion -Wsign-conversion -Wimplicit-int-conversion` compliance.
-- CMakeUserPresets.json inheritance path corrected from missing `dev` preset to existing `debug` preset.
-- Correct consumer workflow source paths for Linux containers and format all sources exercised by clang-format CI.
-- Fix CI-only transport option and example executable paths; make HTTP hex encoding warning-clean under Clang `-Werror`.
-- Catch2 v3 on Windows MSVC: disable test compilation due to unresolved external symbol linker errors with StringMaker specializations in v3.7.1. Consumer integration tests (add_subdirectory, find_package, FetchContent) validate library functionality on Windows.
+- refac
+- cmake
+- remove ineffective Catch2 cache variables from CMakeLists
+- avoid std::byte in Catch2 assertions to prevent MSVC linker errors
+- add diagnostic messages for Catch2 patching
+- patch Catch2 CMakeLists to force config on MSVC
+- set Catch2 config unconditionally before project()
+- disable Catch2 CPP17_STRING_VIEW and CPP17_BYTE on MSVC
+- set Catch2 config as CACHE variables before FetchContent
+- disable CPP17_STRING_VIEW and CPP17_BYTE StringMakers on MSVC
+- pass CATCH_CONFIG_NO_CPP17_* as compile definitions to test target
+- disable Catch2 C++17 string_view/byte on MSVC to avoid linker errors
+- use inline CMake commands for Windows/MSVC jobs
+- sign conversion warnings in binary_event_traits
+- correct example paths and Windows warnings policy
+- resolve platform-specific workflow failures
+- validate project workflow jobs
+- use valid container image expressions
 
 ## [0.4.0] - 2026-11-20
 
