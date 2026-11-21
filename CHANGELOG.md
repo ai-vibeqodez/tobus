@@ -21,15 +21,18 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ### Changed
 
-- Integrated the shared `ai-warevo/.github` composite actions and reusable PR/release workflows.
-- Pin the bundled `aw::tpl` dependency to v3.1.0 so builds use the supported C++20 API and installed package version.
-- Correct consumer workflow source paths for Linux containers and format all sources exercised by clang-format CI.
-- Fix CI-only transport option and example executable paths; make HTTP hex encoding warning-clean under Clang `-Werror`.
+- Integrated reusable workflows and composite actions from `ai-warevo/.github` catalog: CI uses shared `reusable-pr-fast.yml` for fast PR checks and catalog composite actions for Linux builds; Windows MSVC builds use inline CMake commands since shared actions require Ninja which is unavailable on windows-latest.
+- Release workflow uses shared `reusable-release.yml` for version resolution, changelog promotion, tag creation, checksum generation/verification, and GitHub Release publication.
+- Consumers workflow refactored to test library integration via `add_subdirectory`, `find_package`, and `FetchContent` on Linux clang/gcc and Windows MSVC.
+- Pin bundled `aw::tpl` dependency to v3.1.0 so builds use the supported C++20 API and installed package version.
 - Run TSan on a native runner with the catalog setup action instead of attempting to change host ASLR from a container.
 
 ### Fixed
 
-- Sign conversion warnings in `BinaryEventTraits` serialize/deserialize helpers under `-Wsign-conversion` and `-Wimplicit-int-conversion`.
+- Resolved integer sign-conversion warnings in `bus.hpp`, `event_queue.hpp`, and `BinaryEventTraits` serialize/deserialize helpers with explicit casts for `-Wconversion -Wsign-conversion -Wimplicit-int-conversion` compliance.
+- CMakeUserPresets.json inheritance path corrected from missing `dev` preset to existing `debug` preset.
+- Correct consumer workflow source paths for Linux containers and format all sources exercised by clang-format CI.
+- Fix CI-only transport option and example executable paths; make HTTP hex encoding warning-clean under Clang `-Werror`.
 
 ## [0.4.0] - 2026-11-20
 
