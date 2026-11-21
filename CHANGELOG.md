@@ -23,7 +23,9 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 - Integrated the shared `ai-warevo/.github` composite actions and reusable PR/release workflows.
 - Pin the bundled `aw::tpl` dependency to v3.1.0 so builds use the supported C++20 API and installed package version.
-- Correct consumer workflow source paths for Linux containers and format the event-trait headers checked by CI.
+- Correct consumer workflow source paths for Linux containers and format all sources exercised by clang-format CI.
+- Fix CI-only transport option and example executable paths; make HTTP hex encoding warning-clean under Clang `-Werror`.
+- Run TSan on a native runner with the catalog setup action instead of attempting to change host ASLR from a container.
 
 ## [0.4.0] - 2026-11-20
 

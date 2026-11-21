@@ -2,8 +2,6 @@
 
 #include "room.hpp"
 
-using namespace std::chrono_literals;
-
 namespace aw::tobus::examples::chat {
 
 Room::Room(IEventBus& bus, void (*log)(std::string_view))

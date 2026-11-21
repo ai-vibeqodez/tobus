@@ -124,7 +124,8 @@ bool receive_all(int fd, std::string& output, std::size_t count) {
 std::string hex_encode(std::string_view bytes) {
     std::string result;
     result.reserve(bytes.size() * 2);
-    for (const unsigned char byte : bytes) {
+    for (const char character : bytes) {
+        const auto byte = static_cast<unsigned char>(character);
         result.push_back(hex_digits[byte >> 4]);
         result.push_back(hex_digits[byte & 0x0f]);
     }

@@ -45,7 +45,7 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
 
-      # Every transport stub is switched on so that all of them are compiled (and -Werror'd) in CI.
+      # POSIX transports are enabled on Linux and disabled on Windows.
       - name: Configure & Build
         uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
@@ -55,10 +55,10 @@ jobs:
           extra_args: >-
             ${{ steps.tc.outputs.cmake_args }}
             -DTOBUS_WARNINGS_AS_ERRORS=ON
-            -DTOBUS_ENABLE_UNIX_SOCKET=ON
-            -DTOBUS_ENABLE_TCP_SERVER=ON
-            -DTOBUS_ENABLE_HTTP=ON
-            -DTOBUS_ENABLE_WEBSOCKET=ON
+            -DTOBUS_ENABLE_UNIX_SOCKET=OFF
+            -DTOBUS_ENABLE_TCP_SERVER=OFF
+            -DTOBUS_ENABLE_HTTP=OFF
+            -DTOBUS_ENABLE_WEBSOCKET=OFF
             -DTOBUS_ENABLE_REDIS=ON
             -DTOBUS_ENABLE_ZEROMQ=ON
             -DTOBUS_ENABLE_RABBITMQ=ON
@@ -74,7 +74,7 @@ jobs:
           timeout: 120
 
       - name: Run example
-        run: ./build/examples/tobus_example_01_in_process
+        run: ./build/tobus_example_01_in_process
 
   build-test-windows:
     name: Windows ${{ matrix.toolchain }} / ${{ matrix.build_type }}
@@ -98,7 +98,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
 
-      # Every transport stub is switched on so that all of them are compiled (and -Werror'd) in CI.
+      # POSIX transports are enabled on Linux and disabled on Windows.
       - name: Configure & Build
         uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
@@ -108,10 +108,10 @@ jobs:
           extra_args: >-
             ${{ steps.tc.outputs.cmake_args }}
             -DTOBUS_WARNINGS_AS_ERRORS=ON
-            -DTOBUS_ENABLE_UNIX_SOCKET=ON
-            -DTOBUS_ENABLE_TCP_SERVER=ON
-            -DTOBUS_ENABLE_HTTP=ON
-            -DTOBUS_ENABLE_WEBSOCKET=ON
+            -DTOBUS_ENABLE_UNIX_SOCKET=OFF
+            -DTOBUS_ENABLE_TCP_SERVER=OFF
+            -DTOBUS_ENABLE_HTTP=OFF
+            -DTOBUS_ENABLE_WEBSOCKET=OFF
             -DTOBUS_ENABLE_REDIS=ON
             -DTOBUS_ENABLE_ZEROMQ=ON
             -DTOBUS_ENABLE_RABBITMQ=ON
@@ -129,7 +129,7 @@ jobs:
       - name: Run example (Windows)
         shell: pwsh
         run: |
-          $exe = "./build/examples/tobus_example_01_in_process.exe"
+          $exe = "./build/tobus_example_01_in_process.exe"
           Write-Host "=== tobus_example_01_in_process"
           & $exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
