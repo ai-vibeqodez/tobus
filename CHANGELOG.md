@@ -14,6 +14,15 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-21
+
+### Changed
+
+- Merge pull request #4 from ai-warevo/loktionov129-patch-2
+- Update README.md
+- Merge branch 'main' of github.com:ai-warevo/tobus
+- fixiik
+
 ## [0.5.0] - 2026-11-21
 
 ### Added
