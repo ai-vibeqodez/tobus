@@ -90,7 +90,7 @@ TEST_CASE("Subscription is move-only and moving transfers ownership", "[subscrip
         co_return;
     });
     Subscription moved(std::move(sub));
-    REQUIRE_FALSE(sub.active()); // NOLINT(bugprone-use-after-move): testing the moved-from state
+    REQUIRE_FALSE(sub.active());
     REQUIRE(moved.active());
 
     // Move-assigning over an active subscription cancels the old one.

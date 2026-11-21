@@ -26,7 +26,7 @@ void write_default_report(std::string_view event_name, const std::exception_ptr&
         }
         line += '\n';
         std::cerr << line << std::flush; // one insertion: lines from concurrent handlers do not interleave mid-line
-    } catch (...) { // NOLINT(bugprone-empty-catch): reporting must never throw (bad_alloc, closed stderr)
+    } catch (...) {
     }
 }
 
@@ -74,7 +74,7 @@ void Dispatcher::unsubscribe(EventTypeId id, std::uint64_t token) noexcept {
             next->erase(it);
         }
         table_ = std::move(next);
-    } catch (...) { // NOLINT(bugprone-empty-catch): only bad_alloc; the handler then simply stays registered
+    } catch (...) {
     }
 }
 
@@ -147,7 +147,7 @@ void Dispatcher::report(const std::exception_ptr& ep, std::string_view event_nam
     }
     try {
         on_error_(ep);
-    } catch (...) { // NOLINT(bugprone-empty-catch): a throwing error handler must not take the bus down
+    } catch (...) {
     }
 }
 

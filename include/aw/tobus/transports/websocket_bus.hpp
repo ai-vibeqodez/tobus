@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_WEBSOCKET_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_WEBSOCKET_BUS_HPP
 
 /**
  * @file websocket_bus.hpp
@@ -27,3 +28,5 @@ protected:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_WEBSOCKET_BUS_HPP

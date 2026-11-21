@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_EVENT_TRAITS_JSON_EVENT_TRAITS_HPP
+#define AW_TOBUS_EVENT_TRAITS_JSON_EVENT_TRAITS_HPP
 
 /**
  * @file json_event_traits.hpp
@@ -43,7 +44,7 @@ namespace aw::tobus {
  */
 template <typename T>
 struct JsonEventTraits {
-    static constexpr std::string_view name = ""; // must be set by the user
+    static constexpr std::string_view name{}; // must be set by the user
 
     static std::vector<std::byte> serialize(const T& event) {
         auto j = event.to_json();
@@ -82,3 +83,5 @@ struct JsonEventTraits {
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_EVENT_TRAITS_JSON_EVENT_TRAITS_HPP

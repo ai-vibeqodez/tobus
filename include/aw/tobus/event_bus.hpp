@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_EVENT_BUS_HPP
+#define AW_TOBUS_EVENT_BUS_HPP
 
 /**
  * @file event_bus.hpp
@@ -96,3 +97,5 @@ protected:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_EVENT_BUS_HPP

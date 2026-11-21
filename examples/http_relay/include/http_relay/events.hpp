@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_HTTP_RELAY_EVENTS_HPP
+#define AW_TOBUS_HTTP_RELAY_EVENTS_HPP
 
 #include <aw/tobus/tobus.hpp>
 #include <aw/tobus/event_traits/binary_event_traits.hpp>
@@ -19,3 +20,5 @@ struct aw::tobus::EventTraits<http_relay::TemperatureReading>
     : aw::tobus::BinaryEventTraits<http_relay::TemperatureReading> {
     static constexpr std::string_view name = "example.http_relay.TemperatureReading";
 };
+
+#endif  // AW_TOBUS_HTTP_RELAY_EVENTS_HPP

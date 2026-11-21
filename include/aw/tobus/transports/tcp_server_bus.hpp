@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_TCP_SERVER_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_TCP_SERVER_BUS_HPP
 
 /**
  * @file tcp_server_bus.hpp
@@ -27,3 +28,5 @@ protected:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_TCP_SERVER_BUS_HPP

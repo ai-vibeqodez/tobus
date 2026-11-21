@@ -1,6 +1,7 @@
 // Room module — users talk into it; it shows only what moderation approved.
 
-#pragma once
+#ifndef AW_TOBUS_CHAT_ROOM_HPP
+#define AW_TOBUS_CHAT_ROOM_HPP
 
 #include <aw/tobus/tobus.hpp>
 #include "events.hpp"
@@ -25,3 +26,5 @@ private:
 };
 
 } // namespace aw::tobus::examples::chat
+
+#endif  // AW_TOBUS_CHAT_ROOM_HPP

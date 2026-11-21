@@ -61,7 +61,7 @@ Checks:
   # Altera / Fuchsia specific (embedded / OS checks, not applicable)
   - '-altera-*'
   - '-fuchsia-*'
-  # Header guard: we use #pragma once
+  # Header guard: standard include guards (AW_<PROJECT>_<PATH>_HPP)
   - '-llvm-header-guard'
   # Non-private member variables: detail structs have public fields by design
   - '-misc-non-private-member-variables-in-classes'
@@ -80,6 +80,14 @@ Checks:
   - '-google-explicit-constructor'
   # Cognitive complexity: when_all is inherently complex (32 vs threshold 25)
   - '-readability-function-cognitive-complexity'
+  # Empty catch: intentional for error handlers in bus code
+  - '-bugprone-empty-catch'
+  # Branch clone: transport selection switch has identical-looking branches
+  - '-bugprone-branch-clone'
+  # Exception base class: test code intentionally throws non-std::exception
+  - '-hicpp-exception-baseclass'
+  # Use after move: test patterns verify moved-from states
+  - '-bugprone-use-after-move'
   # Magic numbers: literal indices, buffer sizes (4, 8, 0xff) acceptable in serialization
   - '-cppcoreguidelines-avoid-magic-numbers'
   - '-readability-magic-numbers'
@@ -91,16 +99,12 @@ Checks:
   - '-modernize-use-constraints'
   # Init-variables: false positives on memcpy targets
   - '-cppcoreguidelines-init-variables'
-  # Branch clone: false positive on constexpr if with identical fallback
-  - '-bugprone-branch-clone'
   # Pointer arithmetic: intentional in parsing
   - '-cppcoreguidelines-pro-bounds-pointer-arithmetic'
   # Android-specific checks: not applicable to portable C++
   - '-android-*'
   # TODO format: codebase uses unattributed TODOs intentionally
   - '-google-readability-todo'
-  # Empty catch: intentional for certain error scenarios
-  - '-bugprone-empty-catch'
   # Designated initializers: not always applicable to C++20
   - '-modernize-use-designated-initializers'
   # Isolate declarations: multi-declaration pattern used intentionally

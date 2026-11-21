@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_HTTP_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_HTTP_BUS_HPP
 
 /**
  * @file http_bus.hpp
@@ -52,3 +53,5 @@ private:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_HTTP_BUS_HPP

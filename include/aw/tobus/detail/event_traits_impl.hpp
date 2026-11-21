@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_DETAIL_EVENT_TRAITS_IMPL_HPP
+#define AW_TOBUS_DETAIL_EVENT_TRAITS_IMPL_HPP
 
 /**
  * @file event_traits_impl.hpp
@@ -31,3 +32,5 @@ EventTypeInfo make_event_type_info() {
 }
 
 } // namespace aw::tobus::detail
+
+#endif  // AW_TOBUS_DETAIL_EVENT_TRAITS_IMPL_HPP

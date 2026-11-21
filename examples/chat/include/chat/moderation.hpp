@@ -1,6 +1,7 @@
 // Moderation module — checks every MessageSent and answers with MessageApproved or MessageBlocked.
 
-#pragma once
+#ifndef AW_TOBUS_CHAT_MODERATION_HPP
+#define AW_TOBUS_CHAT_MODERATION_HPP
 
 #include <aw/tobus/tobus.hpp>
 #include "events.hpp"
@@ -19,3 +20,5 @@ private:
 };
 
 } // namespace aw::tobus::examples::chat
+
+#endif  // AW_TOBUS_CHAT_MODERATION_HPP

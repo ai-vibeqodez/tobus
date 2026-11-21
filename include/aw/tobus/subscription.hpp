@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_SUBSCRIPTION_HPP
+#define AW_TOBUS_SUBSCRIPTION_HPP
 
 /**
  * @file subscription.hpp
@@ -48,7 +49,7 @@ public:
         if (auto fn = std::exchange(cancel_, nullptr)) {
             try {
                 fn();
-            } catch (...) { // NOLINT(bugprone-empty-catch): unsubscribing must not throw from a destructor
+            } catch (...) {
             }
         }
     }
@@ -64,3 +65,5 @@ private:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_SUBSCRIPTION_HPP

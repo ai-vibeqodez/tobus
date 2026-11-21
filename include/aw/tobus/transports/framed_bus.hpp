@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_FRAMED_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_FRAMED_BUS_HPP
 
 /**
  * @file framed_bus.hpp
@@ -75,3 +76,5 @@ private:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_FRAMED_BUS_HPP

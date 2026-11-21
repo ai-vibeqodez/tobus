@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_IN_PROCESS_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_IN_PROCESS_BUS_HPP
 
 /**
  * @file in_process_bus.hpp
@@ -39,3 +40,5 @@ private:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_IN_PROCESS_BUS_HPP

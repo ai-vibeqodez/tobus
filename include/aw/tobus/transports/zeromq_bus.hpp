@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_ZEROMQ_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_ZEROMQ_BUS_HPP
 
 /**
  * @file zeromq_bus.hpp
@@ -21,7 +22,7 @@ class ZeroMQBus final : public FramedBus {
 public:
     /// @throws TransportNotImplemented Always (until implemented).
     explicit ZeroMQBus(EventBusConfig config);
-    ~ZeroMQBus() override;
+    ~ZeroMQBus() override = default;
 
     [[nodiscard]] std::string_view transport_name() const noexcept override;
 
@@ -35,8 +36,6 @@ inline ZeroMQBus::ZeroMQBus(EventBusConfig config)
     throw TransportNotImplemented("ZeroMQBus");
 }
 
-inline ZeroMQBus::~ZeroMQBus() = default;
-
 inline std::string_view ZeroMQBus::transport_name() const noexcept {
     return "zeromq";
 }
@@ -47,3 +46,5 @@ inline void ZeroMQBus::send_frame(const Frame&) {
 }
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_ZEROMQ_BUS_HPP

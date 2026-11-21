@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_EVENT_TRAITS_HPP
+#define AW_TOBUS_EVENT_TRAITS_HPP
 
 /**
  * @file event_traits.hpp
@@ -78,3 +79,5 @@ template <typename T>
 }
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_EVENT_TRAITS_HPP

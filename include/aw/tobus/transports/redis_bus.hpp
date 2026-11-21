@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_REDIS_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_REDIS_BUS_HPP
 
 /**
  * @file redis_bus.hpp
@@ -21,7 +22,7 @@ class RedisBus final : public FramedBus {
 public:
     /// @throws TransportNotImplemented Always (until implemented).
     explicit RedisBus(EventBusConfig config);
-    ~RedisBus() override;
+    ~RedisBus() override = default;
 
     [[nodiscard]] std::string_view transport_name() const noexcept override;
 
@@ -35,8 +36,6 @@ inline RedisBus::RedisBus(EventBusConfig config)
     throw TransportNotImplemented("RedisBus");
 }
 
-inline RedisBus::~RedisBus() = default;
-
 inline std::string_view RedisBus::transport_name() const noexcept {
     return "redis";
 }
@@ -47,3 +46,5 @@ inline void RedisBus::send_frame(const Frame&) {
 }
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_REDIS_BUS_HPP

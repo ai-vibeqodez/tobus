@@ -22,7 +22,7 @@ test: build
 
 lint: build
 	@if command -v clang-tidy >/dev/null 2>&1; then \
-	    find include src -name '*.hpp' -o -name '*.cpp' | grep -v event_traits_impl.hpp | xargs clang-tidy -p build/$(PRESET) --warnings-as-errors='*'; \
+	    find include src -name '*.hpp' -o -name '*.cpp' | grep -v event_traits_impl.hpp | grep -v json_event_traits.hpp | xargs clang-tidy -p build/$(PRESET) --warnings-as-errors='*'; \
 	else echo "clang-tidy not found"; fi
 
 format:

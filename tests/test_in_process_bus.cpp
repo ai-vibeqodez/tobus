@@ -261,7 +261,7 @@ TEST_CASE("a non-std exception from a handler is reported too", "[in_process][er
     {
         InProcessBus bus;
         auto sub = bus.subscribe<Ping>([](const Ping&) -> Task<void> {
-            throw 42; // NOLINT(hicpp-exception-baseclass)
+            throw 42;
             co_return;
         });
         bus.publish(Ping{});

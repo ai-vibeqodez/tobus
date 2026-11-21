@@ -1,6 +1,7 @@
 // Auth module — publishes UserJoined. Does not know who (if anyone) cares.
 
-#pragma once
+#ifndef AW_TOBUS_CHAT_AUTH_HPP
+#define AW_TOBUS_CHAT_AUTH_HPP
 
 #include <aw/tobus/tobus.hpp>
 #include "events.hpp"
@@ -21,3 +22,5 @@ private:
 };
 
 } // namespace aw::tobus::examples::chat
+
+#endif  // AW_TOBUS_CHAT_AUTH_HPP

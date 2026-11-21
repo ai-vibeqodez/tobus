@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_EVENT_BUS_FACTORY_HPP
+#define AW_TOBUS_EVENT_BUS_FACTORY_HPP
 
 /**
  * @file event_bus_factory.hpp
@@ -31,3 +32,5 @@ public:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_EVENT_BUS_FACTORY_HPP

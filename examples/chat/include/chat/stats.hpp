@@ -1,7 +1,8 @@
 // Stats module — pure observer: subscribes to everything, publishes nothing.
 // Adding it required no change in any other module.
 
-#pragma once
+#ifndef AW_TOBUS_CHAT_STATS_HPP
+#define AW_TOBUS_CHAT_STATS_HPP
 
 #include <atomic>
 #include <aw/tobus/tobus.hpp>
@@ -29,3 +30,5 @@ private:
 };
 
 } // namespace aw::tobus::examples::chat
+
+#endif  // AW_TOBUS_CHAT_STATS_HPP

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TOBUS_HPP
+#define AW_TOBUS_TOBUS_HPP
 
 /**
  * @file tobus.hpp
@@ -22,3 +23,5 @@
 #include <aw/tobus/event_type_id.hpp>
 #include <aw/tobus/subscription.hpp>
 #include <aw/tobus/transport_kind.hpp>
+
+#endif  // AW_TOBUS_TOBUS_HPP

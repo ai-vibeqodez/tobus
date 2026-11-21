@@ -35,7 +35,7 @@ bool EventBusFactory::is_available(TransportKind kind) noexcept {
     switch (kind) {
     case TransportKind::in_process:
         return true;
-    case TransportKind::unix_socket: // NOLINT(bugprone-branch-clone)
+    case TransportKind::unix_socket:
         return TOBUS_HAS_UNIX_SOCKET != 0;
     case TransportKind::tcp_server:
         return TOBUS_HAS_TCP_SERVER != 0;

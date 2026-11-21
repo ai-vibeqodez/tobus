@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_DETAIL_DISPATCHER_HPP
+#define AW_TOBUS_DETAIL_DISPATCHER_HPP
 
 /**
  * @file dispatcher.hpp
@@ -90,3 +91,5 @@ private:
 };
 
 } // namespace aw::tobus::detail
+
+#endif  // AW_TOBUS_DETAIL_DISPATCHER_HPP

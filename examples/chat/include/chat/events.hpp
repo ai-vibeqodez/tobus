@@ -1,7 +1,8 @@
 // Event types shared by all chat modules.
 // Each struct is the whole "contract" between modules — no base class, no framework.
 
-#pragma once
+#ifndef AW_TOBUS_CHAT_EVENTS_HPP
+#define AW_TOBUS_CHAT_EVENTS_HPP
 
 #include <string>
 
@@ -27,3 +28,5 @@ struct MessageBlocked { // moderation said "no"
 };
 
 } // namespace aw::tobus::examples::chat
+
+#endif  // AW_TOBUS_CHAT_EVENTS_HPP

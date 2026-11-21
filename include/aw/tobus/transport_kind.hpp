@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORT_KIND_HPP
+#define AW_TOBUS_TRANSPORT_KIND_HPP
 
 /**
  * @file transport_kind.hpp
@@ -47,3 +48,5 @@ inline constexpr std::array<TransportKind, 9> all_transport_kinds{
 [[nodiscard]] std::optional<TransportKind> transport_from_string(std::string_view name) noexcept;
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORT_KIND_HPP

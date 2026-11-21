@@ -1,22 +1,23 @@
-#pragma once
+#ifndef AW_TOBUS_EVENT_TRAITS_BINARY_EVENT_TRAITS_HPP
+#define AW_TOBUS_EVENT_TRAITS_BINARY_EVENT_TRAITS_HPP
 
 /**
  * @file binary_event_traits.hpp
- * @brief BinaryEventTraits<T> — готовая специализация EventTraits<T>, сериализующая T в сырые байты.
+ * @brief BinaryEventTraits<T> — a ready-made specialization of EventTraits<T> that serializes T into raw bytes.
  *
- * Поддерживаются два режима:
+ * Two modes are supported:
  *
- * 1. Trivial mode (по умолчанию). Любой trivially-copyable тип размером <= 256 байт копируется
- *    через std::memcpy. Формат: один байт длины + сырые байты.
+ * 1. Trivial mode (default). Any trivially-copyable type of size <= 256 bytes is copied
+ *    via std::memcpy. Format: one length byte + raw bytes.
  *
- * 2. Field mode. Для нетривиальных типов (например, содержащих std::string) специализируйте
- *    to_binary() и from_binary():
+ * 2. Field mode. For non-trivial types (e.g., containing std::string), specialize
+ *    to_binary() and from_binary():
  *
- *    to_binary возвращает std::vector<std::byte>, from_binary принимает span<const std::byte> и T&.
+ *    to_binary returns std::vector<std::byte>, from_binary takes span<const std::byte> and T&.
  *
- * Сериализованный payload префиксируется одним байтом длины (макс. 255).
- * BinaryEventTraits — основа для hex-кодированного HTTP-транспорта: транспорт hex-кодирует
- * сырые байты; traits сами производят и потребляют только сырые байты.
+ * The serialized payload is prefixed with one length byte (max. 255).
+ * BinaryEventTraits is the foundation for hex-encoded HTTP transport: the transport hex-encodes
+ * raw bytes; the traits themselves produce and consume only raw bytes.
  */
 
 #include <aw/tobus/event_traits.hpp>
@@ -34,15 +35,15 @@
 namespace aw::tobus {
 
 /**
- * @brief Готовая специализация EventTraits<T>, сериализующая T в сырые байты.
+ * @brief A ready-made specialization of EventTraits<T> that serializes T into raw bytes.
  *
- * Для trivially-copyable типов <= 255 байт payload — один байт длины + std::memcpy объекта.
- * Для сложных типов пользователь может специализировать to_binary() / from_binary().
+ * For trivially-copyable types <= 255 bytes, the payload is one length byte + std::memcpy of the object.
+ * For complex types, the user can specialize to_binary() / from_binary().
  * @tparam T Event type.
  */
 template <typename T>
 struct BinaryEventTraits {
-    static constexpr std::string_view name = ""; // must be set by the user
+    static constexpr std::string_view name{}; // must be set by the user
 
     static std::vector<std::byte> serialize(const T& event) {
         constexpr std::size_t MaxSize = 255;
@@ -75,7 +76,7 @@ struct BinaryEventTraits {
         if (bytes.empty() || bytes[0] == std::byte(0))
             throw std::runtime_error("BinaryEventTraits: zero-length payload");
 
-        std::size_t payload_size = static_cast<std::size_t>(bytes[0]);
+        auto payload_size = static_cast<std::size_t>(bytes[0]);
         if (payload_size + 1 > bytes.size()) throw std::runtime_error("BinaryEventTraits: payload size exceeds buffer");
 
         std::span<const std::byte> payload = bytes.subspan(1, payload_size);
@@ -101,3 +102,5 @@ struct BinaryEventTraits {
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_EVENT_TRAITS_BINARY_EVENT_TRAITS_HPP

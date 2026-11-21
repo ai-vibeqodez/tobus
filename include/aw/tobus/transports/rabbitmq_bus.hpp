@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_RABBITMQ_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_RABBITMQ_BUS_HPP
 
 /**
  * @file rabbitmq_bus.hpp
@@ -21,7 +22,7 @@ class RabbitMQBus final : public FramedBus {
 public:
     /// @throws TransportNotImplemented Always (until implemented).
     explicit RabbitMQBus(EventBusConfig config);
-    ~RabbitMQBus() override;
+    ~RabbitMQBus() override = default;
 
     [[nodiscard]] std::string_view transport_name() const noexcept override;
 
@@ -35,8 +36,6 @@ inline RabbitMQBus::RabbitMQBus(EventBusConfig config)
     throw TransportNotImplemented("RabbitMQBus");
 }
 
-inline RabbitMQBus::~RabbitMQBus() = default;
-
 inline std::string_view RabbitMQBus::transport_name() const noexcept {
     return "rabbitmq";
 }
@@ -47,3 +46,5 @@ inline void RabbitMQBus::send_frame(const Frame&) {
 }
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_RABBITMQ_BUS_HPP

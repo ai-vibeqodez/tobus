@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_EVENT_TYPE_ID_HPP
+#define AW_TOBUS_EVENT_TYPE_ID_HPP
 
 /**
  * @file event_type_id.hpp
@@ -78,3 +79,5 @@ struct std::hash<aw::tobus::EventTypeId> {
         return static_cast<std::size_t>(id.value);
     }
 };
+
+#endif  // AW_TOBUS_EVENT_TYPE_ID_HPP

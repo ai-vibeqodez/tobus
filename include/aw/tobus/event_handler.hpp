@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_EVENT_HANDLER_HPP
+#define AW_TOBUS_EVENT_HANDLER_HPP
 
 /**
  * @file event_handler.hpp
@@ -29,3 +30,5 @@ using RawEventHandler = std::function<Task<void>(const void*)>;
 using ErrorHandler = aw::tpl::threading::tasks::ErrorHandler;
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_EVENT_HANDLER_HPP

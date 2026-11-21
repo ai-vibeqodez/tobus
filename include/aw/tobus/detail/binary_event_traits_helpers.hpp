@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_DETAIL_BINARY_EVENT_TRAITS_HELPERS_HPP
+#define AW_TOBUS_DETAIL_BINARY_EVENT_TRAITS_HELPERS_HPP
 
 /**
  * @file binary_event_traits_helpers.hpp
@@ -113,3 +114,5 @@ inline std::string deserialize_string(std::span<const std::byte>& span) {
 }
 
 } // namespace aw::tobus::detail
+
+#endif  // AW_TOBUS_DETAIL_BINARY_EVENT_TRAITS_HELPERS_HPP

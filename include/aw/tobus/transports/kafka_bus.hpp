@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_TRANSPORTS_KAFKA_BUS_HPP
+#define AW_TOBUS_TRANSPORTS_KAFKA_BUS_HPP
 
 /**
  * @file kafka_bus.hpp
@@ -21,7 +22,7 @@ class KafkaBus final : public FramedBus {
 public:
     /// @throws TransportNotImplemented Always (until implemented).
     explicit KafkaBus(EventBusConfig config);
-    ~KafkaBus() override;
+    ~KafkaBus() override = default;
 
     [[nodiscard]] std::string_view transport_name() const noexcept override;
 
@@ -35,8 +36,6 @@ inline KafkaBus::KafkaBus(EventBusConfig config)
     throw TransportNotImplemented("KafkaBus");
 }
 
-inline KafkaBus::~KafkaBus() = default;
-
 inline std::string_view KafkaBus::transport_name() const noexcept {
     return "kafka";
 }
@@ -47,3 +46,5 @@ inline void KafkaBus::send_frame(const Frame&) {
 }
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_TRANSPORTS_KAFKA_BUS_HPP

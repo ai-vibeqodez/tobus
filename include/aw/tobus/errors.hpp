@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_ERRORS_HPP
+#define AW_TOBUS_ERRORS_HPP
 
 /**
  * @file errors.hpp
@@ -45,3 +46,5 @@ public:
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_ERRORS_HPP

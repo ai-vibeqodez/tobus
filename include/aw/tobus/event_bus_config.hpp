@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AW_TOBUS_EVENT_BUS_CONFIG_HPP
+#define AW_TOBUS_EVENT_BUS_CONFIG_HPP
 
 /**
  * @file event_bus_config.hpp
@@ -40,3 +41,5 @@ struct EventBusConfig {
 };
 
 } // namespace aw::tobus
+
+#endif  // AW_TOBUS_EVENT_BUS_CONFIG_HPP
