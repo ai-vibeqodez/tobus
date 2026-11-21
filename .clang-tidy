@@ -80,45 +80,34 @@ Checks:
   - '-google-explicit-constructor'
   # Cognitive complexity: when_all is inherently complex (32 vs threshold 25)
   - '-readability-function-cognitive-complexity'
-  # Empty catch: intentional for error handlers in bus code
-  - '-bugprone-empty-catch'
-  # Branch clone: transport selection switch has identical-looking branches
-  - '-bugprone-branch-clone'
-  # Exception base class: test code intentionally throws non-std::exception
-  - '-hicpp-exception-baseclass'
-  # Use after move: test patterns verify moved-from states
-  - '-bugprone-use-after-move'
-  # Magic numbers: literal indices, buffer sizes (4, 8, 0xff) acceptable in serialization
-  - '-cppcoreguidelines-avoid-magic-numbers'
-  - '-readability-magic-numbers'
-  # Bounds-constant-array-index: false positives in loop-based serialization
-  - '-cppcoreguidelines-pro-bounds-constant-array-index'
-  # Signed bitwise: intentional for endianness swaps
-  - '-hicpp-signed-bitwise'
-  # Use-constraints: enable_if_t is valid C++20 (C++23 constraints are optional)
-  - '-modernize-use-constraints'
-  # Init-variables: false positives on memcpy targets
-  - '-cppcoreguidelines-init-variables'
-  # Pointer arithmetic: intentional in parsing
-  - '-cppcoreguidelines-pro-bounds-pointer-arithmetic'
-  # Android-specific checks: not applicable to portable C++
-  - '-android-*'
-  # TODO format: codebase uses unattributed TODOs intentionally
-  - '-google-readability-todo'
-  # Designated initializers: not always applicable to C++20
-  - '-modernize-use-designated-initializers'
-  # Isolate declarations: multi-declaration pattern used intentionally
-  - '-readability-isolate-declaration'
-  # Suspicious stringview data: false positive on subspan
+  # Anonymous namespace: Catch2 TEST_CASE design
+  - '-misc-use-anonymous-namespace'
+  # Do-while: Catch2 REQUIRE/REQUIRE_THROWS macros
+  - '-cppcoreguidelines-avoid-do-while'
+  # String view data usage: dlsym requires C-string, not applicable
   - '-bugprone-suspicious-stringview-data-usage'
-  # Implicit widening: acceptable for literal constant multiplications
-  - '-bugprone-implicit-widening-of-multiplication-result'
-  # Reinterpret cast: byte payload to char is intentional for string append
+  # MT-unsafe: startup code, not multi-threaded
+  - '-concurrency-mt-unsafe'
+  # Constant array index: validated access
+  - '-cppcoreguidelines-pro-bounds-constant-array-index'
+  # Abseil string find: standard library idiom, no abseil dependency
+  - '-abseil-string-find-str-contains'
+  # Reinterpret cast: function pointer casts from dlsym are unavoidable
   - '-cppcoreguidelines-pro-type-reinterpret-cast'
-  # Redundant expression: false positive on npos check
-  - '-misc-redundant-expression'
-  # Nested conditional operators: acceptable for simple fallthrough logic
-  - '-readability-avoid-nested-conditional-operator'
+  # Macro usage: Catch2 test framework macros (TEST_CASE, REQUIRE, etc.)
+  - '-cppcoreguidelines-macro-usage'
+  # Macro to enum: Catch2 config macros (CATCH_CONFIG_*)
+  - '-cppcoreguidelines-macro-to-enum'
+  - '-modernize-macro-to-enum'
+  # Macro parentheses: Catch2 internal macro implementation
+  - '-bugprone-macro-parentheses'
+  # Enum size: Catch2 internal enums
+  - '-performance-enum-size'
+  # Member init: Catch2 internal structs
+  - '-cppcoreguidelines-pro-type-member-init'
+  - '-hicpp-member-init'
+  # Nodiscard: Catch2 functions lack [[nodiscard]]
+  - '-modernize-use-nodiscard'
 
 WarningsAsErrors: '*'
 HeaderFilterRegex: '^(include|src)/'
