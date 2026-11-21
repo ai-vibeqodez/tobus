@@ -50,10 +50,11 @@ function(aw_test_target)
     find_package(Catch2 3 QUIET)
     if(NOT Catch2_FOUND)
         # On MSVC, disable C++17 std::string_view and std::byte StringMaker specializations
-        # to avoid unresolved external symbol linker errors with Catch2 v3.7.1
+        # to avoid unresolved external symbol linker errors with Catch2 v3.7.1.
+        # Set these as CACHE variables BEFORE FetchContent so Catch2's option() commands see them.
         if(MSVC)
-            set(CATCH_CONFIG_NO_CPP17_STRING_VIEW ON CACHE BOOL "Disable std::string_view StringMaker" FORCE)
-            set(CATCH_CONFIG_NO_CPP17_BYTE ON CACHE BOOL "Disable std::byte StringMaker" FORCE)
+            set(CATCH_CONFIG_NO_CPP17_STRING_VIEW ON CACHE BOOL "Disable std::string_view StringMaker")
+            set(CATCH_CONFIG_NO_CPP17_BYTE ON CACHE BOOL "Disable std::byte StringMaker")
         endif()
         
         FetchContent_Declare(Catch2
