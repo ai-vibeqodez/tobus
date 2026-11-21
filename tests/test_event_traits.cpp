@@ -200,7 +200,7 @@ TEST_CASE("serialize_field serializes single byte", "[event_traits][binary]") {
 
     auto bytes = serialize_field(std::byte(0xAB));
     REQUIRE(bytes.size() == 1);
-    REQUIRE(bytes[0] == std::byte(0xAB));
+    REQUIRE(static_cast<unsigned>(bytes[0]) == 0xAB);
 }
 
 TEST_CASE("deserialize_field roundtrips integral values", "[event_traits][binary]") {

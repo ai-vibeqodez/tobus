@@ -7,10 +7,6 @@ cmake_minimum_required(VERSION 3.23)
 set(CATCH_CONFIG_NO_CPP17_STRING_VIEW ON CACHE BOOL "Disable Catch2 string_view support" FORCE)
 set(CATCH_CONFIG_NO_CPP17_BYTE ON CACHE BOOL "Disable Catch2 byte support" FORCE)
 
-message(STATUS "=== Catch2 config set at top-level ===")
-message(STATUS "  CATCH_CONFIG_NO_CPP17_STRING_VIEW = ${CATCH_CONFIG_NO_CPP17_STRING_VIEW}")
-message(STATUS "  CATCH_CONFIG_NO_CPP17_BYTE = ${CATCH_CONFIG_NO_CPP17_BYTE}")
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 include(cmake/ProjectConfig)
