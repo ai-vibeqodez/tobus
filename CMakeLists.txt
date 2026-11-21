@@ -1,8 +1,25 @@
 cmake_minimum_required(VERSION 3.23)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+# --- Fetch reusable CMake modules from template repository ---
+include(FetchContent)
 
-include(cmake/ProjectConfig)
+FetchContent_Declare(
+    aw_cmake_modules
+    GIT_REPOSITORY https://github.com/ai-warevo/template_cpp.git
+    GIT_TAG        main
+    GIT_SHALLOW    TRUE
+    SOURCE_SUBDIR  non_existent_dir
+)
+
+FetchContent_MakeAvailable(aw_cmake_modules)
+
+# Add remote cmake directory to module search path (local cmake/ is checked first)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${aw_cmake_modules_SOURCE_DIR}/cmake")
+
+# --- Project configuration (using remote shared modules) ---
+include(ProjectConfig)  # From template-cpp/cmake/
+
 aw_project_config(NAME tobus NS aw::tobus)
 project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
 
@@ -88,7 +105,7 @@ add_library(tobus STATIC
     src/transports/framed_bus.cpp
 )
 add_library(aw::tobus ALIAS tobus)
-target_compile_features(tobus PUBLIC cxx_std_20)
+target_compile_features(tobus PUBLIC cxx_std_23)
 # src/ is the library's private include root (detail/dispatcher.hpp); it is not part of the installed or exported interface.
 target_include_directories(tobus PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_options(tobus PRIVATE ${AW_WARNINGS} ${AW_STRICT_WARNINGS})
@@ -147,7 +164,7 @@ target_sources(tobus
 )
 
 if(TOBUS_INSTALL)
-    include(cmake/Library/InstallExport)
+    include(Library/InstallExport)  # From template-cpp/cmake/Library/
     aw_install_library(NAME tobus NS aw::tobus DEPENDENCIES "aw_tpl 3.1")
 endif()
 

@@ -2,7 +2,7 @@
 
 > `auto bus = aw::tobus::EventBusFactory::create();` — A fast event shuttle: inside the process it runs direct without transfers or serialization, and when needed it easily takes intercity network routes.
 
-A transport-agnostic event bus for **C++20** (`aw::tobus`). Modules depend only on the `IEventBus` interface; the transport choice under the hood (in-process "shuttle" today; sockets and brokers tomorrow) is determined solely by configuration.
+A transport-agnostic event bus for **C++23** (`aw::tobus`). Modules depend only on the `IEventBus` interface; the transport choice under the hood (in-process "shuttle" today; sockets and brokers tomorrow) is determined solely by configuration.
 
 Use this code with caution.
 

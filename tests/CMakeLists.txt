@@ -1,4 +1,4 @@
-include(cmake/Tests)
+include(Tests)  # Resolved via CMAKE_MODULE_PATH (local cmake/ or remote)
 aw_test_target(NAME tobus
     SOURCES
         test_event_types.cpp

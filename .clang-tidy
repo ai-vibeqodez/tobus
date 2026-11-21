@@ -1,4 +1,4 @@
-# clang-tidy configuration for tobus (C++20, header + source files)
+# clang-tidy configuration for aw::template_cpp (C++20, header + source files)
 # Approach: * (all checks) minus exclusions — similar to nlohmann/json.
 # This catches new bugs automatically as LLVM adds new checks.
 #
@@ -82,5 +82,5 @@ Checks:
   - '-readability-function-cognitive-complexity'
 
 WarningsAsErrors: ''
-HeaderFilterRegex: '/tobus/(include|src)/'
+HeaderFilterRegex: '^(include|src)/'
 FormatStyle: file

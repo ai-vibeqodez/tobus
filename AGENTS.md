@@ -4,7 +4,7 @@ Guidance for working on `aw::tobus`. Read `README.md` for the user-facing API; t
 
 ## Identity & philosophy
 
-`aw::tobus` is a transport-agnostic **event bus** for C++20 (`aw::tobus`). Modules publish events to `IEventBus` and subscribe independently — the publisher doesn't know who (or how many) subscribers exist. The transport layer (in-process, Unix socket, TCP, HTTP, WebSocket, Redis, ZeroMQ, RabbitMQ, Kafka) is selected at configuration time.
+`aw::tobus` is a transport-agnostic **event bus** for C++23 (`aw::tobus`). Modules publish events to `IEventBus` and subscribe independently — the publisher doesn't know who (or how many) subscribers exist. The transport layer (in-process, Unix socket, TCP, HTTP, WebSocket, Redis, ZeroMQ, RabbitMQ, Kafka) is selected at configuration time.
 
 Dependencies: only [`aw::tpl`](https://github.com/ai-warevo/tpl) (coroutines) and the C++ standard library.
 
@@ -82,9 +82,9 @@ Namespaces map to directories:
 - Inline `//` comments: minimal — only for non-obvious logic, subtle reasoning, or the *why*. Prefer better names over comments.
 - Keep README tables/examples in sync when public behaviour changes.
 
-## C++20 conventions & style
+## C++23 conventions & style
 
-- Idiomatic modern C++20: concepts, `requires`, `if constexpr`, coroutines, RAII.
+- Idiomatic modern C++23: concepts, `requires`, `if constexpr`, coroutines, RAII.
 - `[[nodiscard]]` on factories and pure getters; `noexcept` where truly non-throwing; `explicit` on single-arg constructors.
 - Naming: types `PascalCase`; functions/variables/files `snake_case`; private data members `trailing_underscore_`.
 - Formatting (`.clang-format`, `.editorconfig`): 4 spaces, 120 cols, attached braces, `Type* p` / `Type& r`, no namespace indentation, closing comments `} // namespace aw::tobus`.
