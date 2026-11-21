@@ -118,9 +118,17 @@ jobs:
         run: |
           $config = "${{ matrix.build_type }}"
           $exe = "./build/$config/examples/chat/tobus_example_chat.exe"
-          Write-Host "=== tobus_example_chat ($config)"
-          & $exe
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host "=== Looking for executable at: $exe"
+          if (Test-Path $exe) {
+            Write-Host "=== Running tobus_example_chat ($config)"
+            & $exe
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } else {
+            Write-Host "ERROR: Executable not found at $exe"
+            Write-Host "Contents of ./build:"
+            Get-ChildItem -Path ./build -Recurse -File -Filter "*.exe" | ForEach-Object { Write-Host $_.FullName }
+            exit 1
+          }
 
   # Default options (no transport stubs): this is what a consumer gets without enabling anything.
   build-test-default:
