@@ -1,0 +1,147 @@
+# Weekly Deep — sanitizers + stress + coverage (scheduled + manual)
+#
+# Triggers: scheduled weekly on Monday 00:00 UTC, or manual (workflow_dispatch)
+# Calls: reusable-sanitizers.yml from ai-warevo/.github
+#
+# This workflow runs the comprehensive test suite:
+#   - ASan + UBSan (full test suite in container)
+#   - TSan (concurrency tests + 30x stress repeats on host)
+#   - Stress (30x concurrency tests in Release optimized builds)
+#   - Coverage (gcovr → badge → GitHub Pages, main branch only)
+
+name: Weekly Deep
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # every Monday at 00:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  sanitizers:
+    uses: ai-warevo/.github/.github/workflows/reusable-sanitizers.yml@main
+    with:
+      source_dir: .
+      build_dir: build
+      container_image: ghcr.io/ai-warevo/ci-cpp23
+      cmake_sanitize_var: AW_TPL_SANITIZE
+      cmake_extra_args: ''
+      ctest_timeout: 300
+      tsan_repeat_count: 30
+      tsan_test_regex: 'tobus_concurrency'
+      asan_options: 'alloc_dealloc_mismatch=0:detect_leaks=1'
+      tsan_options: 'halt_on_error=1:second_deadlock_stack=1'
+
+  stress:
+    name: Repeat concurrency tests 30x (${{ matrix.toolchain }}, Release)
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ai-warevo/ci-cpp23
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [clang18-libcxx, gcc15]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          container_mode: true
+
+      - name: Configure & Build
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: Release
+          extra_args: ${{ steps.tc.outputs.cmake_args }}
+
+      - name: Repeat the concurrency tests
+        working-directory: build
+        run: ctest -C Release -R tobus_concurrency --repeat until-fail:30 --output-on-failure --timeout 120
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ai-warevo/ci-cpp23
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        id: tc
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
+        with:
+          toolchain: gcc15
+          container_mode: true
+
+      - name: Configure & Build
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: Debug
+          extra_args: >-
+            ${{ steps.tc.outputs.cmake_args }}
+            -DAW_TPL_ENABLE_COVERAGE=ON
+
+      - name: Run Tests
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: Debug
+          output_on_failure: true
+          timeout: 300
+
+      - name: Generate Coverage Reports (XML & HTML)
+        uses: ai-warevo/.github/.github/actions/gcovr-report@main
+        with:
+          source_dir: .
+          build_dir: build
+          source_filter: "include/aw/tobus/ src/"
+          exclude: _deps/*
+          output_dir: htmlcov
+          xml_path: coverage.xml
+
+      - name: Parse Coverage Metrics
+        id: coverage_parser
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: ai-warevo/.github/.github/actions/coverage-parser@main
+        with:
+          xml_path: coverage.xml
+
+      - name: Generate Coverage Badge
+        id: badge_generator
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: ai-warevo/.github/.github/actions/badge@main
+        with:
+          width: '99'
+          height: '20'
+          text_left: 'coverage'
+          text_right: '${{ steps.coverage_parser.outputs.percent }}'
+          bg_color_right: '${{ steps.coverage_parser.outputs.color }}'
+          filename: 'coverage.svg'
+
+      - name: Deploy Badge
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: ai-warevo/.github/.github/actions/badge-deploy@main
+        with:
+          badge_path: coverage.svg
+
+      - name: Deploy Coverage Report to gh-pages
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: ai-warevo/.github/.github/actions/coverage-html-deploy@main
+        with:
+          folder: htmlcov
