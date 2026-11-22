@@ -9,6 +9,7 @@ if(TOBUS_WARNINGS_AS_ERRORS)
             test_stubs.cpp
             test_http_bus.cpp
             test_event_traits.cpp
+            test_framed_bus_coverage.cpp
         LINK_TARGET aw::tobus
         STRICT_WARNINGS)
 else()
@@ -21,6 +22,7 @@ else()
             test_stubs.cpp
             test_http_bus.cpp
             test_event_traits.cpp
+            test_framed_bus_coverage.cpp
         LINK_TARGET aw::tobus)
 endif()
 
