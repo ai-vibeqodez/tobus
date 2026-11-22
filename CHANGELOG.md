@@ -14,6 +14,10 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+### Fixed
+
+- configure shared compiler warning flags after `project()` for Linux and MSVC builds
+
 ## [0.5.2] - 2026-11-21
 
 ### Changed

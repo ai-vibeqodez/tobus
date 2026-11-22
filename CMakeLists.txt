@@ -21,6 +21,7 @@ include(ProjectConfig)
 
 aw_project_config(NAME tobus NS aw::tobus)
 project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
+aw_configure_warnings()
 
 # clang-tidy (CI) reads compile_commands.json. aw_project_config() sets this too, but only in its own function scope.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -29,10 +30,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(Compiler)
 
 # AW_WARNINGS is also applied directly to examples and tests, outside aw_configure_compiler().
-if(MSVC)
-    set(AW_WARNINGS /W4)
-    set(AW_STRICT_WARNINGS /WX)
-endif()
 
 # Top-level builds get tests and examples by default; consumers (FetchContent / add_subdirectory) do not.
 if(PROJECT_IS_TOP_LEVEL)
