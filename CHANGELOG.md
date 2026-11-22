@@ -14,6 +14,17 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-11-22
+
+### Changed
+
+- use reusable-coverage-badge workflow
+- Merge branch 'main' of github.com:ai-warevo/tobus
+
+### Fixed
+
+- enable coverage badge updates for scheduled/manual runs
+
 ## [0.5.5] - 2026-11-22
 
 ### Changed
