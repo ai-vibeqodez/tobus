@@ -132,7 +132,7 @@ TEST_CASE("FramedBus handles deserialization errors in receive_frame", "[framed_
     TestProbe bus(config);
 
     // Subscribe to establish the event type
-    auto sub = bus.subscribe<WireEvent>([](const WireEvent& /*event*/) -> Task<void> { co_return; });
+    [[maybe_unused]] auto sub = bus.subscribe<WireEvent>([](const WireEvent& /*event*/) -> Task<void> { co_return; });
 
     // Create a frame with truncated (invalid) payload
     FramedBus::Frame bad_frame;
@@ -178,7 +178,7 @@ TEST_CASE("FramedBus reports transport errors through error handler", "[framed_b
 
     auto bus = std::make_unique<TestProbe>(config);
 
-    auto sub = bus->subscribe<TestEvent>([](const TestEvent& /*event*/) -> Task<void> { co_return; });
+    [[maybe_unused]] auto sub = bus->subscribe<TestEvent>([](const TestEvent& /*event*/) -> Task<void> { co_return; });
 
     // Simulate a transport error
     std::exception_ptr simulated_error;
