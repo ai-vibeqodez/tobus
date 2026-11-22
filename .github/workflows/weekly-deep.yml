@@ -83,5 +83,5 @@ jobs:
       container_image: ghcr.io/ai-warevo/ci-cpp23
       toolchain: gcc15
       cmake_extra_args: '-DAW_TOBUS_BUILD_TESTS=ON -DAW_TOBUS_ENABLE_COVERAGE=ON'
-      gcovr_source_filter: 'include/aw/tobus/ src/'
+      gcovr_source_filter: 'include/aw/tobus src'
       gcovr_exclude: '_deps/*'
