@@ -14,13 +14,23 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-11-22
+
 ### Changed
 
-- reuse shared `template_cpp` CMake target, test, example, and compiler helpers
+- use shared template_cpp CMake helpers for target and example setup
+- clang-tidy
+- clang-tidy
+- fix
+- cmake
+- Merge branch 'main' of github.com:ai-warevo/tobus
+- finalize canonical clang-tidy configuration with all exclusions
+- merge project-specific clang-tidy exclusions into canonical config
+- synchronize clang-tidy config from template-cpp
 
 ### Fixed
 
-- configure shared compiler warning flags after `project()` for Linux and MSVC builds
+- configure shared warning flags after project
 
 ## [0.5.2] - 2026-11-21
 
