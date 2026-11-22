@@ -3,6 +3,7 @@ if(TOBUS_WARNINGS_AS_ERRORS)
     aw_test_target(NAME tobus
         SOURCES
             test_event_types.cpp
+            test_errors_coverage.cpp
             test_in_process_bus.cpp
             test_subscription.cpp
             test_factory.cpp
@@ -16,6 +17,7 @@ else()
     aw_test_target(NAME tobus
         SOURCES
             test_event_types.cpp
+            test_errors_coverage.cpp
             test_in_process_bus.cpp
             test_subscription.cpp
             test_factory.cpp
