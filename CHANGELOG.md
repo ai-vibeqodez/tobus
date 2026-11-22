@@ -14,6 +14,16 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.5.5] - 2026-11-22
+
+### Changed
+
+- Merge branch 'main' of github.com:ai-warevo/tobus
+
+### Fixed
+
+- mark unused EventTraits::name as [[maybe_unused]]
+
 ## [0.5.4] - 2026-11-22
 
 ### Changed
