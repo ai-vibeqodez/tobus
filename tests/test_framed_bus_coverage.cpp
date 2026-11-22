@@ -19,7 +19,7 @@ struct WireEvent {
     std::uint32_t data = 0;
 };
 
-}  // namespace
+} // namespace
 
 template <>
 struct aw::tobus::EventTraits<TestEvent> {
@@ -67,8 +67,8 @@ public:
     [[nodiscard]] std::string_view transport_name() const noexcept override { return "test_probe"; }
 
     using FramedBus::receive_frame;
-    using FramedBus::require_serializable;
     using FramedBus::report_transport_error;
+    using FramedBus::require_serializable;
 
     void send_frame(const Frame& /*frame*/) override {
         // No-op for testing
@@ -77,7 +77,7 @@ public:
 
 struct NonSerializable {};
 
-}  // namespace
+} // namespace
 
 TEST_CASE("FramedBus drops frames from its own origin", "[framed_bus][coverage]") {
     TestProbe bus;
@@ -99,7 +99,7 @@ TEST_CASE("FramedBus drops frames from its own origin", "[framed_bus][coverage]"
     // Allow any pending tasks to complete
     bus.drain().wait();
 
-    REQUIRE(received_count.load() == 0);  // Should not have received it
+    REQUIRE(received_count.load() == 0); // Should not have received it
 }
 
 TEST_CASE("FramedBus ignores frames for unknown event types", "[framed_bus][coverage]") {
@@ -113,14 +113,14 @@ TEST_CASE("FramedBus ignores frames for unknown event types", "[framed_bus][cove
 
     // Create a frame with unknown event type id
     FramedBus::Frame unknown_frame;
-    unknown_frame.origin = 12345;  // Different origin so it won't be dropped
-    unknown_frame.type = EventTypeId{99999};  // Unknown type
+    unknown_frame.origin = 12345;            // Different origin so it won't be dropped
+    unknown_frame.type = EventTypeId{99999}; // Unknown type
     unknown_frame.payload = {std::byte(1), std::byte(2), std::byte(3), std::byte(4)};
 
     bus.receive_frame(unknown_frame);
     bus.drain().wait();
 
-    REQUIRE(error_count.load() == 0);  // No error expected for unknown type - just silently ignored
+    REQUIRE(error_count.load() == 0); // No error expected for unknown type - just silently ignored
 }
 
 TEST_CASE("FramedBus handles deserialization errors in receive_frame", "[framed_bus][coverage]") {
@@ -138,13 +138,13 @@ TEST_CASE("FramedBus handles deserialization errors in receive_frame", "[framed_
     FramedBus::Frame bad_frame;
     bad_frame.origin = 54321;
     bad_frame.type = event_type_info<WireEvent>().id;
-    bad_frame.payload = {std::byte(1), std::byte(2)};  // Too short, should trigger error in deserialize
+    bad_frame.payload = {std::byte(1), std::byte(2)}; // Too short, should trigger error in deserialize
 
     bus.receive_frame(bad_frame);
     bus.drain().wait();
 
     REQUIRE(caught_error != nullptr);
-    
+
     // Verify it's a deserialization error
     try {
         std::rethrow_exception(caught_error);
@@ -209,7 +209,7 @@ TEST_CASE("FramedBus receive_frame handles exception during encode in publish_ra
     // This is covered in publish_raw lines 46-50, catch block
 
     TestProbe bus(config);
-    
+
     // Set up a subscription so the event type is registered
     auto sub = bus.subscribe<WireEvent>([](const WireEvent& /*event*/) -> Task<void> { co_return; });
 
@@ -224,7 +224,7 @@ TEST_CASE("FramedBus receive_frame handles exception during encode in publish_ra
 
 TEST_CASE("FramedBus type collision detection in subscribe", "[framed_bus][coverage]") {
     TestProbe bus;
-    
+
     // Subscribe with the same type multiple times (should work since it's the same type)
     auto sub1 = bus.subscribe<TestEvent>([](const TestEvent& /*event*/) -> Task<void> { co_return; });
     auto sub2 = bus.subscribe<TestEvent>([](const TestEvent& /*event*/) -> Task<void> { co_return; });
@@ -266,7 +266,7 @@ TEST_CASE("FramedBus receive_frame delivers events from other origins", "[framed
 
     // Create a frame from a different origin
     FramedBus::Frame frame;
-    frame.origin = 98765;  // Different from bus.origin_id()
+    frame.origin = 98765; // Different from bus.origin_id()
     frame.type = event_type_info<TestEvent>().id;
     // Serialize value 777
     int value = 777;
