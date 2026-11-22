@@ -106,6 +106,12 @@ if(TOBUS_WARNINGS_AS_ERRORS)
     aw_configure_compiler(TARGET tobus STRICT_WARNINGS)
 endif()
 
+if(AW_ENABLE_COVERAGE)
+    # Add coverage flags to library target for code coverage analysis
+    target_compile_options(tobus PRIVATE --coverage)
+    target_link_options(tobus PRIVATE --coverage)
+endif()
+
 set(_tobus_socket_transports UNIX_SOCKET TCP_SERVER HTTP WEBSOCKET)
 set(_tobus_broker_transports REDIS ZEROMQ RABBITMQ KAFKA)
 foreach(_transport IN LISTS _tobus_socket_transports _tobus_broker_transports)
