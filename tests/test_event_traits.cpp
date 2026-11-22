@@ -40,7 +40,7 @@ struct MixedFields {
 
 template <>
 struct aw::tobus::EventTraits<Point2D> : aw::tobus::BinaryEventTraits<Point2D> {
-    static constexpr std::string_view name = "test.Point2D";
+    [[maybe_unused]] static constexpr std::string_view name = "test.Point2D";
 };
 
 template <>
@@ -50,7 +50,7 @@ struct aw::tobus::EventTraits<TemperatureReading> : aw::tobus::BinaryEventTraits
 
 template <>
 struct aw::tobus::EventTraits<MixedFields> : aw::tobus::BinaryEventTraits<MixedFields> {
-    static constexpr std::string_view name = "test.MixedFields";
+    [[maybe_unused]] static constexpr std::string_view name = "test.MixedFields";
 };
 
 TEST_CASE("BinaryEventTraits roundtrips a trivially-copyable struct", "[event_traits][binary]") {
