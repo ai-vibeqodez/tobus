@@ -8,25 +8,27 @@
 #include <aw/tobus/tobus.hpp>
 #include "events.hpp"
 
-using namespace aw::tobus;
-
 namespace aw::tobus::examples::chat {
 
-class Stats {
-public:
-    explicit Stats(IEventBus& bus);
-
+struct StatsData {
     // Handlers run concurrently on different threads, hence atomics.
     std::atomic<int> joined{0};
     std::atomic<int> sent{0};
     std::atomic<int> approved{0};
     std::atomic<int> blocked{0};
+};
+
+class Stats {
+public:
+    explicit Stats(aw::tobus::IEventBus& bus);
+
+    StatsData data;  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
 
 private:
-    Subscription joined_;
-    Subscription sent_;
-    Subscription approved_;
-    Subscription blocked_;
+    aw::tobus::Subscription joined_;
+    aw::tobus::Subscription sent_;
+    aw::tobus::Subscription approved_;
+    aw::tobus::Subscription blocked_;
 };
 
 } // namespace aw::tobus::examples::chat

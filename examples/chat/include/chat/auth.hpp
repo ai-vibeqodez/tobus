@@ -6,19 +6,17 @@
 #include <aw/tobus/tobus.hpp>
 #include "events.hpp"
 
-using namespace aw::tobus;
-
 namespace aw::tobus::examples::chat {
 
 class Auth {
 public:
-    explicit Auth(IEventBus& bus)
+    explicit Auth(aw::tobus::IEventBus& bus)
         : bus_(bus) {}
 
     void login(std::string name) { bus_.publish(UserJoined{std::move(name)}); }
 
 private:
-    IEventBus& bus_;
+    aw::tobus::IEventBus& bus_;
 };
 
 } // namespace aw::tobus::examples::chat

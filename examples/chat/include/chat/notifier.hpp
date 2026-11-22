@@ -7,16 +7,14 @@
 #include <aw/tobus/tobus.hpp>
 #include "events.hpp"
 
-using namespace aw::tobus;
-
 namespace aw::tobus::examples::chat {
 
 class Notifier {
 public:
-    explicit Notifier(IEventBus& bus, void (*log)(std::string_view));
+    explicit Notifier(aw::tobus::IEventBus& bus, void (*log)(std::string_view));
 
 private:
-    Subscription sub_;
+    aw::tobus::Subscription sub_;
 };
 
 } // namespace aw::tobus::examples::chat

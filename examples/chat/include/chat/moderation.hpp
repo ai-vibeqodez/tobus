@@ -6,17 +6,15 @@
 #include <aw/tobus/tobus.hpp>
 #include "events.hpp"
 
-using namespace aw::tobus;
-
 namespace aw::tobus::examples::chat {
 
 class Moderation {
 public:
-    explicit Moderation(IEventBus& bus);
+    explicit Moderation(aw::tobus::IEventBus& bus);
 
 private:
-    IEventBus& bus_;
-    Subscription sub_;
+    aw::tobus::IEventBus& bus_;
+    aw::tobus::Subscription sub_;
 };
 
 } // namespace aw::tobus::examples::chat

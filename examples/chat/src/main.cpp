@@ -18,24 +18,26 @@
 #include "room.hpp"
 #include "stats.hpp"
 
-using namespace aw::tobus;
-using namespace aw::tobus::examples::chat;
 using namespace std::chrono_literals;
 
 // ---- helpers ----------------------------------------------------------------
 
+namespace {
+
 // Serialize console output (handlers run on pool threads).
-static void log(std::string_view line) {
+void log(std::string_view line) {
     static std::mutex m;
     std::lock_guard lock(m);
     std::cout << "[thread " << std::this_thread::get_id() << "] " << line << "\n";
 }
 
+}  // namespace
+
 // ---- main -------------------------------------------------------------------
 
 int main() {
-    EventBusConfig config;
-    config.transport = TransportKind::in_process;
+    aw::tobus::EventBusConfig config;
+    config.transport = aw::tobus::TransportKind::in_process;
     // An exception thrown in any handler ends up here, never at the publisher.
     config.on_error = [](const std::exception_ptr& ep) {
         try {
@@ -45,15 +47,15 @@ int main() {
         }
     };
 
-    auto bus = EventBusFactory::create(config);
+    auto bus = aw::tobus::EventBusFactory::create(config);
     log("transport: " + std::string(bus->transport_name()));
 
     // Compose modules — each one only knows IEventBus&.
-    Auth auth(*bus);
-    Room room(*bus, log);
-    Moderation moderation(*bus);
-    Notifier notifier(*bus, log);
-    Stats stats(*bus);
+    aw::tobus::examples::chat::Auth auth(*bus);
+    aw::tobus::examples::chat::Room room(*bus, log);
+    aw::tobus::examples::chat::Moderation moderation(*bus);
+    aw::tobus::examples::chat::Notifier notifier(*bus, log);
+    aw::tobus::examples::chat::Stats stats(*bus);
 
     // Two "users" act. Every call returns immediately (fire-and-forget):
     // nobody waits for moderation, the room, or the stats. They happen in
@@ -69,8 +71,8 @@ int main() {
     // Use it at shutdown or in tests; normal operation never needs to wait.
     bus->drain().wait();
 
-    std::cout << "\njoined=" << stats.joined << " sent=" << stats.sent << " approved=" << stats.approved
-              << " blocked=" << stats.blocked << "\n";
+    std::cout << "\njoined=" << stats.data.joined << " sent=" << stats.data.sent << " approved=" << stats.data.approved
+              << " blocked=" << stats.data.blocked << "\n";
 
     return 0;
 }

@@ -4,14 +4,14 @@
 
 namespace aw::tobus::examples::chat {
 
-Room::Room(IEventBus& bus, void (*log)(std::string_view))
+Room::Room(aw::tobus::IEventBus& bus, void (*log)(std::string_view))
     : bus_(bus),
       log_(log),
-      joined_(bus.subscribe<UserJoined>([this](const UserJoined& e) -> Task<void> {
+      joined_(bus.subscribe<UserJoined>([this](const UserJoined& e) -> aw::tpl::threading::tasks::Task<void> {  // NOLINT
           log_("[room]      * " + e.name + " joined");
           co_return;
       })),
-      approved_(bus.subscribe<MessageApproved>([this](const MessageApproved& e) -> Task<void> {
+      approved_(bus.subscribe<MessageApproved>([this](const MessageApproved& e) -> aw::tpl::threading::tasks::Task<void> {  // NOLINT
           log_("[room]      " + e.from + ": " + e.text);
           co_return;
       })) {}
