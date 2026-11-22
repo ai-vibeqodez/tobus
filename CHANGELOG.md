@@ -14,6 +14,10 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+### Changed
+
+- reuse shared `template_cpp` CMake target, test, example, and compiler helpers
+
 ### Fixed
 
 - configure shared compiler warning flags after `project()` for Linux and MSVC builds
