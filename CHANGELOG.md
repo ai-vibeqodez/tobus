@@ -14,6 +14,13 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-11-22
+
+### Changed
+
+- Merge branch 'main' of github.com:ai-warevo/tobus
+- fix clang-tidy lint errors in chat example
+
 ## [0.5.3] - 2026-11-22
 
 ### Changed
