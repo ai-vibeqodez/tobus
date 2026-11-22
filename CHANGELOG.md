@@ -17,6 +17,7 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 ### Added
 
 - Comprehensive `FramedBus` test coverage for edge cases: origin filtering, deserialization errors, type collisions, and transport error handling in `test_framed_bus_coverage.cpp`
+- Comprehensive error exception test coverage in `test_errors_coverage.cpp`: all `TransportKind` values, exception message formatting, and inheritance hierarchy
 
 ## [0.5.6] - 2026-11-22
 
